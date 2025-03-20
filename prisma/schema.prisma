@@ -1,0 +1,210 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String       @id @default(cuid())
+  accountId   String
+  accountType Designation  @default(Teacher)
+  createdAt   DateTime     @default(now())
+  password    String
+  username    String       @unique
+}
+
+model ClassSubject {
+  csId       String    @id @default(cuid())
+  classId    String
+  subjectId  String
+  employeeId String
+  sessionId  String
+  Grades     Grades    @relation(fields: [classId], references: [classId])
+  Employees  Employees @relation(fields: [employeeId], references: [employeeId])
+  Sessions   Sessions  @relation(fields: [sessionId], references: [sessionId])
+  Subject    Subject   @relation(fields: [subjectId], references: [subjectId])
+}
+
+model Employees {
+  employeeId         String             @id @default(cuid())
+  registrationNumber String             @unique
+  employeeName       String             @db.VarChar(100)
+  fatherName         String             @db.VarChar(100)
+  admissionNumber    String             @unique
+  gender             Gender
+  dob                String             @default("none")
+  cnic               String             @default("0000-0000000-0")
+  maritalStatus      MaritalStatus
+  doj                String             @default("none")
+  designation        Designation
+  residentialAddress String
+  mobileNo           String             @default("none")
+  additionalContact  String?            @default("none")
+  education          String             @default("none")
+  isAssign           Boolean            @default(false)
+  profilePic         String?            @default("/user.jpg")
+  cv                 String?
+  ClassSubject       ClassSubject[]
+  SalaryAssignment   SalaryAssignment[]
+  SalaryIncrement    SalaryIncrement[]
+}
+
+model FeeStudentClass {
+  sfcId               String       @id @default(cuid())
+  studentClassId      String
+  feeId               String
+    tuitionPaid       Boolean @default(false)
+  examFundPaid      Boolean @default(false)
+  computerLabPaid   Boolean @default(false)
+  studentIdCardPaid Boolean @default(false)
+  infoAndCallsPaid  Boolean @default(false)
+  discount            Float        @default(0)
+  discountByPercent   Float        @default(0)
+  discountDescription String
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  fees                Fees         @relation(fields: [feeId], references: [feeId])
+  StudentClass        StudentClass @relation(fields: [studentClassId], references: [scId])
+}
+
+model Fees {
+  feeId            String            @id @default(cuid())
+  level            String
+  admissionFee     Float             @default(5000)
+  tuitionFee       Float
+  examFund         Float
+  computerLabFund  Float?
+  studentIdCardFee Float             @default(500)
+  infoAndCallsFee  Float             @default(500)
+  type             FeeCategory       @default(MonthlyFee)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  FeeStudentClass  FeeStudentClass[]
+}
+
+model Grades {
+  classId      String         @id @default(cuid())
+  grade        String         @default("none")
+  section      String         @default("ROSE")
+  category     ClassCategory  @default(Montessori)
+  fee          Float          @default(0)
+  ClassSubject ClassSubject[]
+  StudentClass StudentClass[]
+}
+
+model SalaryAssignment {
+  id           String    @id @default(cuid())
+  employeeId   String
+  baseSalary   Float
+  increment    Float
+  totalSalary  Float
+  assignedDate DateTime  @default(now())
+  sessionId    String
+  Employees    Employees @relation(fields: [employeeId], references: [employeeId])
+  Sessions     Sessions  @relation(fields: [sessionId], references: [sessionId])
+}
+
+model SalaryIncrement {
+  id              String    @id @default(cuid())
+  employeeId      String
+  incrementAmount Float
+  reason          String
+  effectiveDate   DateTime
+  Employees       Employees @relation(fields: [employeeId], references: [employeeId])
+}
+
+model Sessions {
+  sessionId        String             @id @default(cuid())
+  sessionName      String             @default("none")
+  sessionFrom      String             @default("none")
+  sessionTo        String             @default("none")
+  isActive         Boolean            @default(false)
+  ClassSubject     ClassSubject[]
+  SalaryAssignment SalaryAssignment[]
+  StudentClass     StudentClass[]
+}
+
+model StudentClass {
+  scId            String            @id @default(cuid())
+  studentId       String
+  classId         String
+  sessionId       String
+  FeeStudentClass FeeStudentClass[]
+  Grades          Grades            @relation(fields: [classId], references: [classId])
+  Sessions        Sessions          @relation(fields: [sessionId], references: [sessionId])
+  Students        Students          @relation(fields: [studentId], references: [studentId])
+}
+
+model Students {
+  studentId          String         @id @default(cuid())
+  registrationNumber String         @unique
+  studentMobile      String         @default("none")
+  fatherMobile       String         @default("none")
+  admissionNumber    String         @unique
+  studentName        String         @default("none")
+  gender             Gender
+  dateOfBirth        String         @default("none")
+  fatherName         String         @default("none")
+  studentCNIC        String         @default("0000-0000000-0")
+  fatherCNIC         String         @default("0000-0000000-0")
+  fatherProfession   String         @default("none")
+  bloodGroup         String?        @default("none")
+  guardianName       String?        @default("none")
+  caste              String         @default("none")
+  currentAddress     String         @default("none")
+  permanentAddress   String         @default("none")
+  medicalProblem     String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  isAssign           Boolean        @default(false)
+  profilePic         String?        @default("/user.jpg")
+  StudentClass       StudentClass[]
+}
+
+model Subject {
+  subjectId    String         @id @default(cuid())
+  subjectName  String
+  book         String?
+  description  String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  ClassSubject ClassSubject[]
+}
+
+enum ClassCategory {
+  Montessori
+  Primary
+  Middle
+  SSC_I
+  SSC_II
+}
+
+enum Designation {
+  Principal
+  Admin
+  Head
+  Clerk
+  Teacher
+  Worker
+}
+
+enum FeeCategory {
+  MonthlyFee
+  AnnualFee
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  CUSTOM
+}
+
+enum MaritalStatus {
+  Married
+  Unmarried
+  Widow
+  Divorced
+}

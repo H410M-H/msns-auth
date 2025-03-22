@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
+import Image from "next/image";
+
 import {
   Facebook,
   Twitter,
@@ -58,7 +59,7 @@ export const Footer = ({ className, ...props }: FooterProps) => {
             <div className="flex flex-col items-center md:items-start space-y-6">
               <div className="relative group">
                 <Image
-                  src="https://res.cloudinary.com/dvvbxrs55/image/upload/v1729267533/Official_LOGO_grn_ic9ldd.png"
+                  src="https://res.cloudinary.com/dvvbxrs55/image/upload/v1729267544/off_logo_ggu1ci.png"
                   alt="School Logo"
                   width={140}
                   height={140}
@@ -98,7 +99,7 @@ export const Footer = ({ className, ...props }: FooterProps) => {
               {["Home", "About", "Academics", "Contact"].map((item) => (
                 <Link
                   key={item}
-                  href="#"
+                  href="/#"
                   className="block text-green-700 transition-all hover:text-pink-600 hover:pl-2 hover:font-medium"
                 >
                   {item}
@@ -114,8 +115,8 @@ export const Footer = ({ className, ...props }: FooterProps) => {
               <div className="flex items-start space-x-2">
                 <MapPin className="h-5 w-5 text-green-600 mt-1" />
                 <div>
-                  <span className="text-green-700 block">123 Education Street</span>
-                  <span className="text-green-700">Karachi, Pakistan</span>
+                  <span className="text-green-700 block"> G.T. Road, Ghakhar Opposite to Model Police station</span>
+                  <span className="text-green-700">Ghakhar, 52200, Pakistan</span>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
@@ -158,8 +159,8 @@ export const Footer = ({ className, ...props }: FooterProps) => {
         {/* Copyright */}
         <div className="flex flex-col items-center justify-between md:flex-row md:space-y-0">
           <p className="text-center text-sm text-green-700 font-medium">
-            © {new Date().getFullYear()} MSNS-DEV | M.S. NAZ HIGH SCHOOL®
-            <br className="md:hidden" /> HH_STUDIOS™ | All rights reserved.
+            © {new Date().getFullYear()} MSNS-DEV™ | M.S. NAZ HIGH SCHOOL®
+            <br className="md:hidden" /> | All rights reserved.
           </p>
           <div className="flex space-x-4">
             <Link href="#" className="text-sm text-green-700 hover:text-pink-600 transition-colors">

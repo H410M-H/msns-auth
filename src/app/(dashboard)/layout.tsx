@@ -14,9 +14,9 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   // Get the user's role and redirect if not authenticated
-    const role = "admin"
+  const role = 'admin' || 'clerk' || 'principal' || 'teacher' || 'student';
   if (!role) {
-    redirect("/sign-in")
+    redirect("/")
   }
 
   return (

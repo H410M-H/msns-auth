@@ -1,12 +1,17 @@
 export interface User {
-    id: string
-    name: string
-    email: string
-    avatar: string
-    bio?: string
-    notifications: boolean
-    marketing: boolean
-    security_emails: boolean
-  }
-  
-  
+  id: string;
+  username: string;
+  password: string;
+  accountType: Designation;
+  accountId: string;
+  createdAt: Date;
+}
+
+export enum Designation {
+  Principal = "Principal",
+  Admin = "Admin",
+  Head = "Head",
+  Clerk = "Clerk",
+  Teacher = "Teacher",
+  Worker = "Worker"
+}

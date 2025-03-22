@@ -14,6 +14,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 // const publicRoutes = [ "/sign-in(.*)", "/", "/api/webhook"];
 // const isPublic = createRouteMatcher(publicRoutes);
 const isAdminRoute = createRouteMatcher(['/admin(.*)'])
+const isClerkRoute = createRouteMatcher(['/clerk(.*)'])
 
 // Default redirect paths for each role
 // const roleDefaultPaths: Record<string, string> = {
@@ -29,6 +30,10 @@ export default clerkMiddleware(async (auth, req) => {
 
 
   if (isAdminRoute(req) && (await auth()).sessionClaims?.metadata?.role !== 'admin') {
+    const url = new URL('/', req.url)
+    return NextResponse.redirect(url)
+  }
+  if (isClerkRoute(req) && (await auth()).sessionClaims?.metadata?.role !== 'clerk') {
     const url = new URL('/', req.url)
     return NextResponse.redirect(url)
   }

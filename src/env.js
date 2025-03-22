@@ -7,10 +7,16 @@ export const env = createEnv({
    * isn't built with invalid env vars.
    */
   server: {
+    AUTH_SECRET:
+      process.env.NODE_ENV === "production"
+        ? z.string()
+        : z.string().optional(),
     DATABASE_URL: z.string().url(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
+      GCP_SERVICE_ACCOUNT_KEY_PATH:z.string(),
+      GCP_BUCKET_NAME:z.string()
   },
 
   /**
@@ -27,9 +33,11 @@ export const env = createEnv({
    * middlewares) or client-side so we need to destruct manually.
    */
   runtimeEnv: {
+    AUTH_SECRET: process.env.AUTH_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
-    // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
+    GCP_SERVICE_ACCOUNT_KEY_PATH:process.env.GCP_SERVICE_ACCOUNT_KEY_PATH,
+    GCP_BUCKET_NAME:process.env.GCP_BUCKET_NAME
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

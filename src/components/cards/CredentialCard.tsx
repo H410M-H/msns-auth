@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { CldImage } from "next-cloudinary"
 import { Card, CardContent } from "~/components/ui/card"
 import { Badge } from "~/components/ui/badge"
 import { api } from "~/trpc/react"
@@ -11,6 +10,7 @@ import { Input } from "~/components/ui/input"
 import { Button } from "~/components/ui/button"
 import { CSVUploadDialog } from "../forms/student/FileInput"
 import Link from "next/link"
+import Image from "next/image"
 
 type Employee = {
   employeeId: string
@@ -120,7 +120,7 @@ export default function EmployeeCredDetails() {
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-start space-x-4">
                         {employee.profilePic ? (
-                          <CldImage
+                          <Image
                             src={employee.profilePic}
                             alt={`${employee.employeeName}'s profile`}
                             width={60}

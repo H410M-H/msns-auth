@@ -1,9 +1,8 @@
 "use client"
 
 import { Boxes, CalendarCog, type LucideIcon, NotebookPenIcon } from "lucide-react";
-import { CldImage } from "next-cloudinary";
   import Link from "next/link";
-  
+  import Image from "next/image";
     type IconType = LucideIcon
 
     interface Services {
@@ -21,7 +20,7 @@ import { CldImage } from "next-cloudinary";
         title: "Session Management",
         description: "Easily enroll new students and manage their financial records.",
         icon: CalendarCog,
-        href: "/academics/sessionalDetails",
+        href: "./academics/sessionalDetails",
         iconColor: "text-yellow-500",
         gradientFrom: "from-yellow-400",
         gradientTo: "to-yellow-700",
@@ -33,7 +32,7 @@ import { CldImage } from "next-cloudinary";
         iconColor: "text-blue-500",
         gradientFrom: "from-blue-400",
         gradientTo: "to-blue-700",
-        href: "/userReg",
+        href: "/admin/users",
       },
       {
         title: "Section & Class Management",
@@ -59,10 +58,10 @@ import { CldImage } from "next-cloudinary";
       return (
         <div className="relative min-h-screen flex items-center justify-center px-4 py-6 rounded-md">
           {/* Background Image */}
-          <CldImage
+          <Image
             width="1920"
             height="1080"
-            src="FrontView1_alaabu"
+            src="https://res.cloudinary.com/dvvbxrs55/image/upload/v1729267628/Schoolview_zmv8rr.jpg"
             sizes="100vw"
             alt="School view background"
             className="absolute inset-0 object-cover w-full h-full"

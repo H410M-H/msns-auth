@@ -13,7 +13,6 @@ import {
   DollarSign,
   FileText,
   LogOut,
-  Shield,
   UserCog,
 } from "lucide-react"
 import { useClerk, useUser } from "@clerk/nextjs"
@@ -29,26 +28,31 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
   SidebarTrigger,
+  SidebarRail,
+  useSidebar,
 } from "~/components/ui/sidebar"
 import { Button } from "~/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
+import { cn } from "~/lib/utils"
 
 interface DashboardSidebarProps {
-  role: string
+  role: string;
+  className?: string;
 }
 
-export function AppSidebar({ role }: DashboardSidebarProps) {
+export function AppSidebar({ role, className }: DashboardSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { signOut } = useClerk()
   const { user } = useUser()
+  const { isMobile } = useSidebar()
 
   const isActive = (path: string) => {
     return pathname === path || pathname.startsWith(`${path}/`)
   }
 
   const handleLogout = async () => {
-    await signOut(() => router.push("/login"))
+    await signOut(() => router.push("/sign-in"))
   }
 
   // Get user name from Clerk
@@ -57,7 +61,11 @@ export function AppSidebar({ role }: DashboardSidebarProps) {
   const userName = `${firstName} ${lastName}`
 
   return (
-    <Sidebar className="top-16">
+    <Sidebar 
+      collapsible={isMobile ? "offcanvas" : "icon"} 
+      variant="inset"
+      className={cn("flex h-auto top-16 z-40 shadow-lg", className)}
+    >
       <SidebarHeader>
         <div className="flex items-center gap-2 px-2 py-3">
           <School className="h-6 w-6 text-primary" />
@@ -65,44 +73,35 @@ export function AppSidebar({ role }: DashboardSidebarProps) {
         </div>
         <SidebarSeparator />
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="flex-1 overflow-y-auto">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}`)}>
-              <Link href={`/dashboard/${role.toLowerCase()}`}>
+            <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}`)}>
+              <Link href={`/${role.toLowerCase()}`}>
                 <LayoutDashboard />
                 <span>Dashboard</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          {role === "super-admin" && (
+          {role === "admin" && (
             <>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/users`)}>
-                  <Link href={`/dashboard/${role.toLowerCase()}/users`}>
+                <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}/users`)}>
+                  <Link href={`/${role.toLowerCase()}/users`}>
                     <UserCog />
                     <span>User Management</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/roles`)}>
-                  <Link href={`/dashboard/${role.toLowerCase()}/roles`}>
-                    <Shield />
-                    <span>Role Management</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </>
           )}
 
-          {(role === "super-admin" || role === "admin" || role === "principal") && (
+          {(role === "admin" || role === "clerk") && (
             <>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/sessions`)}>
-                  <Link href={`/dashboard/${role.toLowerCase()}/sessions`}>
+                <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}/sessions`)}>
+                  <Link href={`/${role.toLowerCase()}/sessions`}>
                     <Calendar />
                     <span>Sessions</span>
                   </Link>
@@ -110,8 +109,8 @@ export function AppSidebar({ role }: DashboardSidebarProps) {
               </SidebarMenuItem>
 
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/classes`)}>
-                  <Link href={`/dashboard/${role.toLowerCase()}/classes`}>
+                <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}/classes`)}>
+                  <Link href={`/${role.toLowerCase()}/classes`}>
                     <BookOpen />
                     <span>Classes</span>
                   </Link>
@@ -121,18 +120,18 @@ export function AppSidebar({ role }: DashboardSidebarProps) {
           )}
 
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/students`)}>
-              <Link href={`/dashboard/${role.toLowerCase()}/students`}>
+            <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}/students`)}>
+              <Link href={`/${role.toLowerCase()}/students`}>
                 <GraduationCap />
                 <span>Students</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          {(role === "super-admin" || role === "admin" || role === "principal") && (
+          {(role === "admin" || role === "principal") && (
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/employees`)}>
-                <Link href={`/dashboard/${role.toLowerCase()}/employees`}>
+              <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}/employees`)}>
+                <Link href={`/${role.toLowerCase()}/employees`}>
                   <Users />
                   <span>Employees</span>
                 </Link>
@@ -141,8 +140,8 @@ export function AppSidebar({ role }: DashboardSidebarProps) {
           )}
 
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/subjects`)}>
-              <Link href={`/dashboard/${role.toLowerCase()}/subjects`}>
+            <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}/subjects`)}>
+              <Link href={`/${role.toLowerCase()}/subjects`}>
                 <FileText />
                 <span>Subjects</span>
               </Link>
@@ -151,8 +150,8 @@ export function AppSidebar({ role }: DashboardSidebarProps) {
 
           {(role === "super-admin" || role === "admin" || role === "principal" || role === "clerk") && (
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/fees`)}>
-                <Link href={`/dashboard/${role.toLowerCase()}/fees`}>
+              <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}/fees`)}>
+                <Link href={`/${role.toLowerCase()}/fees`}>
                   <DollarSign />
                   <span>Fees</span>
                 </Link>
@@ -162,8 +161,8 @@ export function AppSidebar({ role }: DashboardSidebarProps) {
 
           {(role === "super-admin" || role === "admin" || role === "principal") && (
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/salary`)}>
-                <Link href={`/dashboard/${role.toLowerCase()}/salary`}>
+              <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}/salary`)}>
+                <Link href={`/${role.toLowerCase()}/salary`}>
                   <DollarSign />
                   <span>Salary</span>
                 </Link>
@@ -173,8 +172,8 @@ export function AppSidebar({ role }: DashboardSidebarProps) {
 
           {(role === "super-admin" || role === "admin") && (
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/settings`)}>
-                <Link href={`/dashboard/${role.toLowerCase()}/settings`}>
+              <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}/settings`)}>
+                <Link href={`/${role.toLowerCase()}/settings`}>
                   <Settings />
                   <span>Settings</span>
                 </Link>
@@ -183,7 +182,7 @@ export function AppSidebar({ role }: DashboardSidebarProps) {
           )}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="border-t bg-sidebar-accent/10">
         <SidebarSeparator />
         <div className="p-2">
           <div className="flex items-center gap-2 p-2">
@@ -201,8 +200,8 @@ export function AppSidebar({ role }: DashboardSidebarProps) {
           </div>
         </div>
       </SidebarFooter>
-      <SidebarTrigger className="absolute right-4 top-4 md:hidden" />
+      <SidebarRail className="hover:after:bg-primary/50" />
+      {isMobile && <SidebarTrigger className="absolute right-4 top-4 md:hidden" />}
     </Sidebar>
   )
 }
-

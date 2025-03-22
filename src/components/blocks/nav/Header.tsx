@@ -29,7 +29,7 @@ export default function Header({ className, ...props }: HeaderProps) {
     }
   }, [])
 
-  const isDashboard = pathname === '/dashboard' || pathname === '/academics' || pathname === '/revenue' || pathname === '/account' || pathname === '/userReg';
+  const isDashboard = pathname === '/admin' || pathname === '/academics' || pathname === '/revenue' || pathname === '/account' || pathname === '/userReg';
 
   return (
     <header

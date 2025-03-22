@@ -2,8 +2,8 @@
 "use client"
 import { motion } from "framer-motion";
 import { UserPlus, Users, type LucideIcon } from "lucide-react";
-import { CldImage } from "next-cloudinary";
 import Link from "next/link";
+import Image from "next/image";
 
 type IconType = LucideIcon
 
@@ -22,7 +22,7 @@ const services: Services[] = [
     title: "Student Registration",
     description: "Register new students and manage their admission process with ease.",
     icon: UserPlus,
-    href: "/userReg/student/create",
+    href: "/users/student/create",
     iconColor: "bg-emerald-100",
     gradientFrom: "from-green-400",
     gradientTo: "to-green-700",
@@ -31,7 +31,7 @@ const services: Services[] = [
     title: "Active Students",
     description: "View and manage currently enrolled students' information.",
     icon: Users,
-    href: "/userReg/student/view",
+    href: "/users/student/view",
     iconColor: "bg-blue-100",
     gradientFrom: "from-blue-400",
     gradientTo: "to-blue-700",
@@ -40,7 +40,7 @@ const services: Services[] = [
     title: "Employee Registration",
     description: "Streamline the process of registering new faculty members.",
     icon: UserPlus,
-    href: "/userReg/faculty/create",
+    href: "/users/faculty/create",
     iconColor: "bg-purple-100",
     gradientFrom: "from-purple-400",
     gradientTo: "to-purple-700",
@@ -49,7 +49,7 @@ const services: Services[] = [
     title: "Active Employees",
     description: "Access and manage current faculty member information.",
     icon: Users,
-    href: "/userReg/faculty/view",
+    href: "/users/faculty/view",
     iconColor: "bg-orange-100",
     gradientFrom: "from-orange-400",
     gradientTo: "to-orange-700",
@@ -61,10 +61,10 @@ export default function RegistrationCards() {
     <div className="relative min-h-[60vh] flex items-center justify-center rounded-md overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0">
-        <CldImage
+        <Image
           width="1920"
           height="1080"
-          src="FrontView1_alaabu"
+          src="https://res.cloudinary.com/dvvbxrs55/image/upload/v1729267628/Schoolview_zmv8rr.jpg"
           sizes="100vw"
           alt="School view background"
           className="w-full h-full object-cover"

@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { createTRPCRouter, publicProcedure } from "../trpc"
 import { z } from "zod"
-import { generatePdf } from "~/lib/utils/pdf-reports"
+import { generatePdf } from "~/lib/pdf-reports"
 
 const employeeSchema = z.object({
   employeeName: z.string().min(2).max(100),
@@ -53,7 +53,6 @@ export const EmployeeRouter = createTRPCRouter({
 
   createEmployee: publicProcedure.input(employeeSchema).mutation(async ({ ctx, input }) => {
     try {
-      // Generate registration number
       const currentYear = new Date().getFullYear().toString().slice(-2)
       const latestEmployee = await ctx.db.employees.findFirst({
         where: {
@@ -151,15 +150,18 @@ export const EmployeeRouter = createTRPCRouter({
     }),
 
     generateEmployeeReport: publicProcedure
-  .query(async ({ ctx }) => {
-    const employees = await ctx.db.employees.findMany()
-    return {
-      pdf: await generatePdf(
-        employees,
-        ['EmployeeId', 'EmployeeName', 'Designation', 'RegistrationNumber'],
-        'Employee Report'
-      )
-    }
+    .query(async ({ ctx }) => {
+      const employees = await ctx.db.employees.findMany();
+      const headers = [
+        { key: 'employeeId', label: 'Employee ID' },
+        { key: 'employeeName', label: 'Employee Name' },
+        { key: 'designation', label: 'Designation' },
+        { key: 'registrationNumber', label: 'Registration Number' }
+      ];
+      
+      return {
+        pdf: await generatePdf(employees, headers, 'Employee Report')
+      };
   }),
 })
 

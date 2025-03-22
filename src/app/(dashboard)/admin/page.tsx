@@ -1,5 +1,4 @@
 
-
 import { redirect } from 'next/navigation'
 import { PageHeader } from '~/components/blocks/nav/PageHeader'
 import AdminCards from '~/components/cards/AdminCard'
@@ -11,7 +10,7 @@ export default async function AdminDashboard() {
     redirect('/')
   }
   const breadcrumbs = [
-    { href: "/dashboard", label: "Dashboard", current: true },
+    { href: "/admin", label: "Dashboard", current: true },
   ]
 
 

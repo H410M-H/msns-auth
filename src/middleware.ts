@@ -30,11 +30,11 @@ export default clerkMiddleware(async (auth, req) => {
 
 
   if (isAdminRoute(req) && (await auth()).sessionClaims?.metadata?.role !== 'admin') {
-    const url = new URL('/', req.url)
+    const url = new URL('/dashboard', req.url)
     return NextResponse.redirect(url)
   }
   if (isClerkRoute(req) && (await auth()).sessionClaims?.metadata?.role !== 'clerk') {
-    const url = new URL('/', req.url)
+    const url = new URL('/dashboard', req.url)
     return NextResponse.redirect(url)
   }
 })

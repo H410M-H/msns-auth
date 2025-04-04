@@ -1,14 +1,21 @@
 "use client"
 
-import { SignIn } from "@clerk/nextjs"
+import { SignIn, useUser } from "@clerk/nextjs"
 import Image from "next/image"
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function LoginPage() {
-  const role = 'admin' || 'clerk' || 'principal' || 'teacher' || 'student';
-  if (!role) {
-    redirect("/")
-  }
+  const { user } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    const role = user?.publicMetadata.role;
+    if (typeof role === 'string') {
+      router.push(`/${role}`);
+    }
+  }, [router, user]);
+
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-[url('https://res.cloudinary.com/dvvbxrs55/image/upload/v1729267627/FrontView1_alaabu.jpg')] bg-cover bg-center px-4 sm:px-6 lg:px-4 py-2 animate-fade-in">
       <div className="relative w-full max-w-md sm:max-w-lg lg:max-w-xl">
@@ -25,23 +32,21 @@ export default function LoginPage() {
             <h1 className="text-6xl font-serif font-semibold text-amber-700 mt-2 transition duration-300 transform hover:scale-105">
               MSNS-LMS
             </h1>
-              <SignIn
-                appearance={{
-                  elements: {
-                    formButtonPrimary: "bg-green-800 hover:bg-blue-800/90 text-primary-foreground",
-                    card: "bg-transparent",
-                    headerTitle: "hidden",
-                    headerSubtitle: "text-emerald-800 ",
-                    socialButtonsBlockButton:
-                      "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-                  },
-                }}
-                forceRedirectUrl={`/${role.toLowerCase()}`}
-              />
+            <SignIn
+              appearance={{
+                elements: {
+                  formButtonPrimary: "bg-green-800 hover:bg-blue-800/90 text-primary-foreground",
+                  card: "bg-transparent",
+                  headerTitle: "hidden",
+                  headerSubtitle: "text-emerald-800 ",
+                  socialButtonsBlockButton:
+                    "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+                },
+              }}
+            />
           </div>
         </div>
       </div>
     </div>
   )
 }
-

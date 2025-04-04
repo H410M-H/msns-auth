@@ -3,7 +3,7 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 import { z } from "zod";
 import { generatePdf } from "~/lib/pdf-reports";
 import { type Prisma } from "@prisma/client";
-import { type Student } from "~/app/types";
+import { type Student } from "~/types/index";
 
 // Helper types moved to the top
 type PaginationMeta = {

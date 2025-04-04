@@ -88,7 +88,7 @@ export function AppSidebar({ role, className }: DashboardSidebarProps) {
             <>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}/users`)}>
-                  <Link href={`/${role.toLowerCase()}/users`}>
+                  <Link href={`/${role.toLowerCase()}/admin`}>
                     <UserCog />
                     <span>User Management</span>
                   </Link>

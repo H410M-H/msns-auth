@@ -31,7 +31,7 @@ export async function POST(req: Request) {
       })
     }
 
-    const wh = new Webhook(webhookSecret)
+    const wh: Webhook = new Webhook(webhookSecret)
     let evt: WebhookEvent
 
     // Verify the webhook

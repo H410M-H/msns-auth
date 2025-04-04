@@ -1,14 +1,9 @@
 
-import { redirect } from 'next/navigation'
 import { PageHeader } from '~/components/blocks/nav/PageHeader'
 import AdminCards from '~/components/cards/AdminCard'
 import { StatsCards } from '~/components/cards/StatCard'
-import { checkRole } from '~/lib/roles'
 
 export default async function AdminDashboard() {
-  if (!(await checkRole('admin'))) {
-    redirect('/')
-  }
   const breadcrumbs = [
     { href: "/admin", label: "Dashboard", current: true },
   ]

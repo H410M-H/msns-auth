@@ -1,5 +1,4 @@
 import type React from "react"
-import { redirect } from "next/navigation"
 import { SidebarProvider } from "~/components/ui/sidebar"
 import { TRPCReactProvider } from "~/trpc/react"
 import Header from "~/components/blocks/nav/Header"
@@ -13,18 +12,14 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  // Get the user's role and redirect if not authenticated
-  const role = 'admin' || 'clerk' || 'principal' || 'teacher' || 'student';
-  if (!role) {
-    redirect("/")
-  }
+
 
   return (
     <TRPCReactProvider>
           <div className="flex min-h-screen pt-16">
           <SidebarProvider>
         <UserProvider>
-          <AppSidebar role={role} />
+          <AppSidebar role={""} />
           <main className="flex-1">
           <Header />
             {children}

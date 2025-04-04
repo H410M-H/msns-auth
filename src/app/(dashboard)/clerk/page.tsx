@@ -1,16 +1,12 @@
 
 
 import { DollarSign, FileText, Users, BarChart } from 'lucide-react'
-import { redirect } from 'next/navigation'
 import { PageHeader } from '~/components/blocks/nav/PageHeader'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '~/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
-import { checkRole } from '~/lib/roles'
 
 export default async function ClerkDashboard() {
-  if (!(await checkRole('clerk' || 'admin'))) {
-    redirect('/')
-  }
+
   const breadcrumbs = [
     { href: "/clerk", label: "Dashboard", current: true },
   ]

@@ -1,10 +1,18 @@
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { z } from "zod";
-import { type AcademicSession } from "~/app/types"; // Updated import
+
+// Define SessionProps interface directly here since the import isn't working
+interface SessionProps {
+  sessionId: string;
+  sessionName: string;
+  sessionFrom: Date | string;
+  sessionTo: Date | string;
+  isActive: boolean;
+}
 
 export const SessionRouter = createTRPCRouter({
-  getActiveSession: publicProcedure.query<AcademicSession | null>(async ({ ctx }) => {
+  getActiveSession: publicProcedure.query(async ({ ctx }) => {
     try {
       const session = await ctx.db.sessions.findFirst({
         where: { isActive: true },
@@ -16,7 +24,13 @@ export const SessionRouter = createTRPCRouter({
           isActive: true,
         },
       });
-      return session ? { ...session } : null;
+      return session ? {
+        sessionId: session.sessionId,
+        sessionName: session.sessionName,
+        sessionFrom: session.sessionFrom,
+        sessionTo: session.sessionTo,
+        isActive: session.isActive,
+      } : null;
     } catch (error) {
       console.error("Error in getActiveSession:", error);
       throw new TRPCError({
@@ -26,7 +40,7 @@ export const SessionRouter = createTRPCRouter({
     }
   }),
 
-  getSessions: publicProcedure.query<AcademicSession[]>(async ({ ctx }) => {
+  getSessions: publicProcedure.query(async ({ ctx }) => {
     try {
       const sessions = await ctx.db.sessions.findMany({
         orderBy: { sessionFrom: "desc" },
@@ -38,7 +52,13 @@ export const SessionRouter = createTRPCRouter({
           isActive: true,
         },
       });
-      return sessions.map(s => ({ ...s }));
+      return sessions.map(s => ({
+        sessionId: s.sessionId,
+        sessionName: s.sessionName,
+        sessionFrom: s.sessionFrom,
+        sessionTo: s.sessionTo,
+        isActive: s.isActive,
+      }));
     } catch (error) {
       console.error("Error in getSessions:", error);
       throw new TRPCError({
@@ -48,7 +68,7 @@ export const SessionRouter = createTRPCRouter({
     }
   }),
 
-  getGroupedSessions: publicProcedure.query<{ year: string; sessions: AcademicSession[] }[]>(
+  getGroupedSessions: publicProcedure.query(
     async ({ ctx }) => {
       try {
         const sessions = await ctx.db.sessions.findMany({
@@ -61,17 +81,24 @@ export const SessionRouter = createTRPCRouter({
             isActive: true,
           },
         });
-  
+
         const groupedSessions = sessions.reduce((acc, session) => {
-          const year = new Date(session.sessionFrom).getFullYear().toString();
+          const sessionFromDate = new Date(session.sessionFrom);
+          const year = sessionFromDate.getFullYear().toString();
           const existing = acc.get(year) ?? [];
-          acc.set(year, [...existing, session]);
+          acc.set(year, [...existing, {
+            sessionId: session.sessionId,
+            sessionName: session.sessionName,
+            sessionFrom: session.sessionFrom,
+            sessionTo: session.sessionTo,
+            isActive: session.isActive,
+          }]);
           return acc;
-        }, new Map<string, AcademicSession[]>());
-  
+        }, new Map<string, SessionProps[]>());
+
         return Array.from(groupedSessions, ([year, sessions]) => ({
           year,
-          sessions: sessions.map(s => ({ ...s })),
+          sessions: sessions.map(s => s),
         }));
       } catch (error) {
         console.error("Error in getGroupedSessions:", error);
@@ -87,21 +114,34 @@ export const SessionRouter = createTRPCRouter({
     .input(
       z.object({
         sessionName: z.string().min(1, "Session name is required"),
-        sessionFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
-        sessionTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
+        sessionFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
+        sessionTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
       })
     )
-    .mutation<AcademicSession>(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       try {
         const newSession = await ctx.db.sessions.create({
           data: {
             sessionName: input.sessionName,
-            sessionFrom: input.sessionFrom,
-            sessionTo: input.sessionTo,
+            sessionFrom: new Date(input.sessionFrom).toISOString(),
+            sessionTo: new Date(input.sessionTo).toISOString(),
             isActive: false,
           },
+          select: {
+            sessionId: true,
+            sessionName: true,
+            sessionFrom: true,
+            sessionTo: true,
+            isActive: true,
+          }
         });
-        return { ...newSession };
+        return {
+          sessionId: newSession.sessionId,
+          sessionName: newSession.sessionName,
+          sessionFrom: newSession.sessionFrom,
+          sessionTo: newSession.sessionTo,
+          isActive: newSession.isActive,
+        };
       } catch (error) {
         console.error("Error in createSession:", error);
         throw new TRPCError({
@@ -113,7 +153,7 @@ export const SessionRouter = createTRPCRouter({
 
   deleteSessionsByIds: publicProcedure
     .input(z.object({ sessionIds: z.array(z.string().cuid()) }))
-    .mutation<{ count: number }>(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       try {
         const result = await ctx.db.sessions.deleteMany({
           where: { sessionId: { in: input.sessionIds } },
@@ -130,7 +170,7 @@ export const SessionRouter = createTRPCRouter({
 
   setActiveSession: publicProcedure
     .input(z.object({ sessionId: z.string().cuid() }))
-    .mutation<AcademicSession>(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       try {
         await ctx.db.sessions.updateMany({
           where: { isActive: true },
@@ -149,7 +189,13 @@ export const SessionRouter = createTRPCRouter({
           },
         });
 
-        return activatedSession as AcademicSession;
+        return {
+          sessionId: activatedSession.sessionId,
+          sessionName: activatedSession.sessionName,
+          sessionFrom: activatedSession.sessionFrom,
+          sessionTo: activatedSession.sessionTo,
+          isActive: activatedSession.isActive,
+        };
       } catch (error) {
         console.error("Error in setActiveSession:", error);
         throw new TRPCError({

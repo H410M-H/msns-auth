@@ -19,7 +19,7 @@ type StudentProps = {
   fatherName: string;
   studentCNIC: string;
   fatherCNIC: string;
-  fatherProfession?: string;
+  fatherProfession?: string | null;
   bloodGroup?: string | null;
   guardianName?: string | null;
   caste?: string;
@@ -28,7 +28,8 @@ type StudentProps = {
   medicalProblem?: string | null;
   profilePic?: string | null;
   isAssign: boolean;
-  createdAt: string;
+  createdAt: string  | Date;
+  updatedAt: string | Date;
   discount: number;
   discountByPercent: number;
 };
@@ -59,8 +60,8 @@ type EmployeeProps = {
 type SessionProps = {
   sessionId: string;
   sessionName: string;
-  sessionFrom: string;
-  sessionTo: string;
+  sessionFrom: string | Date;
+  sessionTo: string | Date;
   isActive: boolean;
   salaryAssignments?: SalaryAssignmentProps[];
 };

@@ -3,14 +3,22 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 import { z } from "zod";
 import { generatePdf } from "~/lib/pdf-reports";
 import { type Prisma } from "@prisma/client";
-import { type Student } from "~/types/index";
 
-// Helper types moved to the top
-type PaginationMeta = {
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
+
+
+type StudentReportData = {
+  studentId: string;
+  studentName: string;
+  registrationNumber: string;
+  admissionNumber: string;
+  dateOfBirth: string;
+  gender: string;
+  fatherName: string;
+  studentCNIC: string;
+  fatherCNIC: string;
+  class: string;
+  section: string;
+  session: string;
 };
 
 const cnicRegex = /^\d{5}-\d{7}-\d{1}$/;
@@ -34,21 +42,6 @@ const studentSchema = z.object({
   medicalProblem: z.string().max(500).optional(),
   profilePic: z.string().url("Invalid URL format").optional(),
 });
-
-type StudentReportData = {
-  studentId: string;
-  studentName: string;
-  registrationNumber: string;
-  admissionNumber: string;
-  dateOfBirth: string;
-  gender: string;
-  fatherName: string;
-  studentCNIC: string;
-  fatherCNIC: string;
-  class: string;
-  section: string;
-  session: string;
-};
 
 export const StudentRouter = createTRPCRouter({
   getStudents: publicProcedure.query(async ({ ctx }) => {
@@ -80,7 +73,7 @@ export const StudentRouter = createTRPCRouter({
         },
       });
   
-      return students as Student[];
+      return students;
     } catch (error) {
       console.error("Error fetching students:", error);
       throw new TRPCError({
@@ -89,7 +82,6 @@ export const StudentRouter = createTRPCRouter({
       });
     }
   }),
-  
 
   getUnAllocateStudents: publicProcedure
     .input(
@@ -99,75 +91,73 @@ export const StudentRouter = createTRPCRouter({
         pageSize: z.number().min(1).max(100).default(20),
       }),
     )
-    .query<{ data: Student[]; meta: PaginationMeta }>(
-      async ({ ctx, input }) => {
-        try {
-          const where: Prisma.StudentsWhereInput = {
-            isAssign: false,
-            OR: input.searchTerm
-              ? [
-                  {
-                    studentName: {
-                      contains: input.searchTerm,
-                      mode: "insensitive",
-                    },
+    .query(async ({ ctx, input }) => {
+      try {
+        const where: Prisma.StudentsWhereInput = {
+          isAssign: false,
+          OR: input.searchTerm
+            ? [
+                {
+                  studentName: {
+                    contains: input.searchTerm,
+                    mode: "insensitive",
                   },
-                  {
-                    fatherName: {
-                      contains: input.searchTerm,
-                      mode: "insensitive",
-                    },
+                },
+                {
+                  fatherName: {
+                    contains: input.searchTerm,
+                    mode: "insensitive",
                   },
-                  {
-                    admissionNumber: {
-                      contains: input.searchTerm,
-                      mode: "insensitive",
-                    },
+                },
+                {
+                  admissionNumber: {
+                    contains: input.searchTerm,
+                    mode: "insensitive",
                   },
-                ]
-              : undefined,
-          };
+                },
+              ]
+            : undefined,
+        };
 
-          const [students, total] = await Promise.all([
-            ctx.db.students.findMany({
-              where,
-              skip: (input.page - 1) * input.pageSize,
-              take: input.pageSize,
-              orderBy: { createdAt: "desc" },
-              select: {
-                studentId: true,
-                studentName: true,
-                admissionNumber: true,
-                fatherName: true,
-                studentMobile: true,
-                createdAt: true,
-              },
-            }),
-            ctx.db.students.count({ where }),
-          ]);
-
-          return {
-            data: students as Student[],
-            meta: {
-              total,
-              page: input.page,
-              pageSize: input.pageSize,
-              totalPages: Math.ceil(total / input.pageSize),
+        const [students, total] = await Promise.all([
+          ctx.db.students.findMany({
+            where,
+            skip: (input.page - 1) * input.pageSize,
+            take: input.pageSize,
+            orderBy: { createdAt: "desc" },
+            select: {
+              studentId: true,
+              studentName: true,
+              admissionNumber: true,
+              fatherName: true,
+              studentMobile: true,
+              createdAt: true,
             },
-          };
-        } catch (error) {
-          console.error("Error fetching unallocated students:", error);
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to fetch unassigned students",
-          });
-        }
-      },
-    ),
+          }),
+          ctx.db.students.count({ where }),
+        ]);
 
-    createStudent: publicProcedure
+        return {
+          data: students,
+          meta: {
+            total,
+            page: input.page,
+            pageSize: input.pageSize,
+            totalPages: Math.ceil(total / input.pageSize),
+          },
+        };
+      } catch (error) {
+        console.error("Error fetching unallocated students:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch unassigned students",
+        });
+      }
+    }),
+
+  createStudent: publicProcedure
     .input(studentSchema)
-    .mutation<Student>(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       try {
         const currentYear = new Date().getFullYear().toString().slice(-2);
 
@@ -201,8 +191,8 @@ export const StudentRouter = createTRPCRouter({
             admissionNumber: `S${currentYear}${admissionNumberSequence
               .toString()
               .padStart(3, "0")}`,
-            dateOfBirth: input.dateOfBirth, // Already validated format
-            updatedAt: new Date(), // Added required field
+            dateOfBirth: input.dateOfBirth,
+            updatedAt: new Date(),
           },
           select: {
             studentId: true,
@@ -213,7 +203,7 @@ export const StudentRouter = createTRPCRouter({
           },
         });
 
-        return createdStudent as Student;
+        return createdStudent;
       } catch (error) {
         console.error("Error creating student:", error);
         throw new TRPCError({
@@ -225,7 +215,7 @@ export const StudentRouter = createTRPCRouter({
 
   deleteStudentsByIds: publicProcedure
     .input(z.object({ studentIds: z.array(z.string().cuid()) }))
-    .mutation<{ count: number }>(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       try {
         const result = await ctx.db.students.deleteMany({
           where: { studentId: { in: input.studentIds } },
@@ -240,69 +230,74 @@ export const StudentRouter = createTRPCRouter({
       }
     }),
 
-generateStudentReport: publicProcedure.query<{
-    pdf: string;
-    filename: string;
-  }>(async ({ ctx }) => {
-    const students = await ctx.db.students.findMany({
-      select: {
-        studentId: true,
-        studentName: true,
-        registrationNumber: true,
-        admissionNumber: true,
-        dateOfBirth: true,
-        gender: true,
-        fatherName: true,
-        studentCNIC: true,
-        fatherCNIC: true,
-        StudentClass: {
-          select: {
-            Grades: { select: { grade: true, section: true } },
-            Sessions: { select: { sessionName: true } },
+  generateStudentReport: publicProcedure.query(async ({ ctx }) => {
+    try {
+      const students = await ctx.db.students.findMany({
+        select: {
+          studentId: true,
+          studentName: true,
+          registrationNumber: true,
+          admissionNumber: true,
+          dateOfBirth: true,
+          gender: true,
+          fatherName: true,
+          studentCNIC: true,
+          fatherCNIC: true,
+          StudentClass: {
+            select: {
+              Grades: { select: { grade: true, section: true } },
+              Sessions: { select: { sessionName: true } },
+            },
           },
         },
-      },
-    });
+      });
 
-    const reportData: StudentReportData[] = students.map((student) => ({
-      studentId: student.studentId,
-      studentName: student.studentName,
-      registrationNumber: student.registrationNumber,
-      admissionNumber: student.admissionNumber,
-      dateOfBirth: student.dateOfBirth,
-      gender: student.gender,
-      fatherName: student.fatherName,
-      studentCNIC: student.studentCNIC,
-      fatherCNIC: student.fatherCNIC,
-      class: student.StudentClass[0]?.Grades?.grade ?? "N/A",
-      section: student.StudentClass[0]?.Grades?.section ?? "N/A",
-      session: student.StudentClass[0]?.Sessions?.sessionName ?? "N/A",
-    }));
+      const reportData: StudentReportData[] = students.map((student) => ({
+        studentId: student.studentId,
+        studentName: student.studentName,
+        registrationNumber: student.registrationNumber,
+        admissionNumber: student.admissionNumber,
+        dateOfBirth: student.dateOfBirth,
+        gender: student.gender,
+        fatherName: student.fatherName,
+        studentCNIC: student.studentCNIC,
+        fatherCNIC: student.fatherCNIC,
+        class: student.StudentClass[0]?.Grades?.grade ?? "N/A",
+        section: student.StudentClass[0]?.Grades?.section ?? "N/A",
+        session: student.StudentClass[0]?.Sessions?.sessionName ?? "N/A",
+      }));
 
-    const headers = [
-      { key: "studentId", label: "Student ID" },
-      { key: "studentName", label: "Name" },
-      { key: "registrationNumber", label: "Registration #" },
-      { key: "admissionNumber", label: "Admission #" },
-      { key: "dateOfBirth", label: "Date of Birth" },
-      { key: "gender", label: "Gender" },
-      { key: "fatherName", label: "Father's Name" },
-      { key: "studentCNIC", label: "Student CNIC" },
-      { key: "fatherCNIC", label: "Father's CNIC" },
-      { key: "class", label: "Class" },
-      { key: "section", label: "Section" },
-      { key: "session", label: "Session" },
-    ];
+      const headers = [
+        { key: "studentId", label: "Student ID" },
+        { key: "studentName", label: "Name" },
+        { key: "registrationNumber", label: "Registration #" },
+        { key: "admissionNumber", label: "Admission #" },
+        { key: "dateOfBirth", label: "Date of Birth" },
+        { key: "gender", label: "Gender" },
+        { key: "fatherName", label: "Father's Name" },
+        { key: "studentCNIC", label: "Student CNIC" },
+        { key: "fatherCNIC", label: "Father's CNIC" },
+        { key: "class", label: "Class" },
+        { key: "section", label: "Section" },
+        { key: "session", label: "Session" },
+      ];
 
-    const pdfBuffer = await generatePdf(
-      reportData,
-      headers,
-      "Student Directory Report",
-    );
+      const pdfBuffer = await generatePdf(
+        reportData,
+        headers,
+        "Student Directory Report",
+      );
 
-    return {
-      pdf: Buffer.from(pdfBuffer).toString("base64"),
-      filename: `student-report-${Date.now()}.pdf`,
-    };
+      return {
+        pdf: Buffer.from(pdfBuffer).toString("base64"),
+        filename: `student-report-${Date.now()}.pdf`,
+      };
+    } catch (error) {
+      console.error("Error generating student report:", error);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to generate student report",
+      });
+    }
   }),
 });

@@ -12,24 +12,29 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-
-
   return (
     <TRPCReactProvider>
-          <div className="flex min-h-screen pt-16">
-          <SidebarProvider>
-        <UserProvider>
-          <AppSidebar role={""} />
-          <main className="flex-1">
-          <Header />
-            {children}
-          </main>
-          </UserProvider>
-          </SidebarProvider>
+      <UserProvider>
+        <SidebarProvider>
+          <div className="flex min-h-screen flex-col">
+            <Header />
+            
+            <div className="flex flex-1">
+              <AppSidebar role="admin" /> {/* Replace with dynamic role from your auth system */}
+              
+              <main className="flex-1 overflow-x-hidden pt-4">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                  {children}
+                </div>
+              </main>
+            </div>
+
+            <Footer className="mt-auto border-t" />
           </div>
-          <Footer />
-          <Toaster />
+          
+          <Toaster position="top-right" richColors />
+        </SidebarProvider>
+      </UserProvider>
     </TRPCReactProvider>
   )
 }
-

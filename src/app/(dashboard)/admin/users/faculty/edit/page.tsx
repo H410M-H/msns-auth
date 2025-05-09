@@ -1,5 +1,5 @@
-import EmployeeCredDetails from "~/components/blocks/cards/CredentialCard";
 import { PageHeader } from "~/components/blocks/nav/PageHeader";
+import EmployeeCredDetails from "~/components/cards/CredentialCard";
 import { Separator } from "~/components/ui/separator";
 
 export default function EmployeeCards() {

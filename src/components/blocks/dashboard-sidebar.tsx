@@ -48,7 +48,7 @@ export function DashboardSidebar({ role }: DashboardSidebarProps) {
   }
 
   const handleLogout = async () => {
-    await signOut(() => router.push("/login"))
+    await signOut(() => router.push("/sign-in"))
   }
 
   // Get user name from Clerk

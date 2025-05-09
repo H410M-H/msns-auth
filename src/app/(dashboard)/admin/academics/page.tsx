@@ -7,7 +7,7 @@ import { ScrollArea } from "~/components/ui/scroll-area"
 export default function AcademicsPage() {
   const breadcrumbs = [
     { href: "/dashboard", label: "Dashboard"},
-    { href: "/academics", label: "Academics", current: true },
+    { href: "/admin/academics", label: "Academics", current: true },
   ];
 
   return (

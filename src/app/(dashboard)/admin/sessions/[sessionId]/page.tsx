@@ -10,7 +10,7 @@ export default async function SessionDetailPage({ params }: PageProps) {
   const searchProps = await params;
   const breadcrumbs = [
     { href: "/dashboard", label: "Dashboard" },
-    { href: "/sessions/class", label: "Class Details", current: true },
+    { href: "/admin/sessions/class", label: "Class Details", current: true },
   ];
   return (
     <div className="w-full">

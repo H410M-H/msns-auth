@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { CldImage } from "next-cloudinary"
 import { Card, CardContent } from "~/components/ui/card"
 import { Badge } from "~/components/ui/badge"
 import { api } from "~/trpc/react"
@@ -11,6 +10,7 @@ import { Input } from "~/components/ui/input"
 import { Button } from "~/components/ui/button"
 import { CSVUploadDialog } from "../forms/student/FileInput"
 import Link from "next/link"
+import Image from "next/image"
 
 type StudentProps = {
   createdAt: Date
@@ -34,6 +34,7 @@ export default function StudentCredDetails() {
   const [students, setStudents] = useState<StudentProps[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const { data, isLoading, isError, refetch } = api.student.getStudents.useQuery()
+  
 
   useEffect(() => {
     if (data) {
@@ -100,10 +101,10 @@ export default function StudentCredDetails() {
             </Button>
             <CSVUploadDialog />
             <Button asChild>
-              <Link href="/userReg/student/create">Create</Link>
+              <Link href="/admin/users/student/create">Create</Link>
             </Button>
             <Button asChild>
-              <Link href="/userReg/student/view">View Table</Link>
+              <Link href="/admin/users/student/view">View Table</Link>
             </Button>
           </div>
         </div>
@@ -122,7 +123,7 @@ export default function StudentCredDetails() {
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-start space-x-4">
                         {student.profilePic ? (
-                          <CldImage
+                          <Image
                             src={student.profilePic}
                             alt={`${student.studentName}'s profile`}
                             width={60}

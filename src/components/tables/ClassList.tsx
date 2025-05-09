@@ -154,7 +154,7 @@ export const ClassList = ({ sessionId }: { sessionId: string }) => {
                           size="sm" 
                           className="w-full rounded-lg bg-gradient-to-r from-blue-100 to-blue-50 text-blue-700 hover:from-blue-200 hover:to-blue-100 border border-blue-200/50 shadow-sm transition-all"
                         >
-                          <Link href={`/academics/sessionalDetails/class/?classId=${classItem.classId}&sessionId=${sessionId}`}>
+                          <Link href={`/admin/sessions/class/?classId=${classItem.classId}&sessionId=${sessionId}`}>
                             View Class
                           </Link>
                         </Button>
@@ -163,7 +163,7 @@ export const ClassList = ({ sessionId }: { sessionId: string }) => {
                           size="sm" 
                           className="w-full rounded-lg bg-gradient-to-r from-emerald-100 to-emerald-50 text-emerald-700 hover:from-emerald-200 hover:to-emerald-100 border border-emerald-200/50 shadow-sm transition-all"
                         >
-                          <Link href={`/academics/sessionalDetails/fee/?classId=${classItem.classId}&sessionId=${sessionId}`}>
+                          <Link href={`/admin/sessions/fee/?classId=${classItem.classId}&sessionId=${sessionId}`}>
                             Fee Details
                           </Link>
                         </Button>

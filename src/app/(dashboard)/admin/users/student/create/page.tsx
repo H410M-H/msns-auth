@@ -6,7 +6,7 @@ export default function StudentRegistration(){
     const breadcrumbs = [
         { href: "/dashboard", label: "Dashboard", },
         { href: "/academics", label: "Academics", },
-        { href: "/userReg/student", label: "Student Registration", current: true },
+        { href: "/admin/usres/student/view", label: "Student Registration", current: true },
       ]
       
       return (

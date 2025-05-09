@@ -5,7 +5,6 @@ import { generatePdf } from "~/lib/pdf-reports";
 import { type Prisma } from "@prisma/client";
 
 
-
 type StudentReportData = {
   studentId: string;
   studentName: string;
@@ -24,7 +23,7 @@ type StudentReportData = {
 const cnicRegex = /^\d{5}-\d{7}-\d{1}$/;
 const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
-const studentSchema = z.object({
+export const studentSchema = z.object({
   studentMobile: z.string().min(11, "Invalid mobile number").max(15),
   fatherMobile: z.string().min(11, "Invalid mobile number").max(15),
   studentName: z.string().min(3, "Name too short").max(100),
@@ -40,7 +39,15 @@ const studentSchema = z.object({
   currentAddress: z.string().min(5, "Address too short").max(200),
   permanentAddress: z.string().min(5, "Address too short").max(500),
   medicalProblem: z.string().max(500).optional(),
-  profilePic: z.string().url("Invalid URL format").optional(),
+  isAssign: z.boolean().default(false),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+  studentId: z.string().cuid().optional(),
+  registrationNumber: z.string().optional(),
+  admissionNumber: z.string().optional(),
+  studentClassId: z.string().cuid().optional(),
+  sessionId: z.string().cuid().optional(),
+  profilePic: z.string().optional(),
 });
 
 export const StudentRouter = createTRPCRouter({
@@ -66,10 +73,10 @@ export const StudentRouter = createTRPCRouter({
           currentAddress: true,
           permanentAddress: true,
           medicalProblem: true,
-          profilePic: true,
           isAssign: true,
           createdAt: true,
           updatedAt: true,
+          profilePic: true,
         },
       });
   
@@ -193,6 +200,7 @@ export const StudentRouter = createTRPCRouter({
               .padStart(3, "0")}`,
             dateOfBirth: input.dateOfBirth,
             updatedAt: new Date(),
+            createdAt: new Date(),
           },
           select: {
             studentId: true,
@@ -200,6 +208,13 @@ export const StudentRouter = createTRPCRouter({
             admissionNumber: true,
             studentName: true,
             createdAt: true,
+            updatedAt: true,
+            studentMobile: true,
+            fatherMobile: true,
+            fatherName: true,
+            studentCNIC: true,
+            fatherCNIC: true,
+            fatherProfession: true,
           },
         });
 
@@ -212,6 +227,68 @@ export const StudentRouter = createTRPCRouter({
         });
       }
     }),
+
+  // In StudentRouter (trpc/router/student.ts)
+getStudentById: publicProcedure
+.input(z.object({ studentId: z.string().cuid() }))
+.query(async ({ ctx, input }) => {
+  try {
+    const student = await ctx.db.students.findUnique({
+      where: { studentId: input.studentId },
+      select: {
+        studentId: true,
+        studentName: true,
+        fatherName: true,
+        gender: true,
+        dateOfBirth: true,
+        studentCNIC: true,
+        fatherCNIC: true,
+        studentMobile: true,
+        fatherMobile: true,
+        caste: true,
+        currentAddress: true,
+        permanentAddress: true,
+        medicalProblem: true,
+        profilePic: true,
+        isAssign: true,
+      },
+    });
+    if (!student) throw new TRPCError({ code: "NOT_FOUND" });
+    return student;
+  } catch (error) {
+    console.error("Error fetching student:", error);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Failed to fetch student",
+    });
+  }
+}),
+
+updateStudent: publicProcedure
+.input(
+  studentSchema
+    .omit({ registrationNumber: true, admissionNumber: true })
+    .extend({ studentId: z.string().cuid() })
+)
+.mutation(async ({ ctx, input }) => {
+  try {
+    const { studentId, ...data } = input;
+    const updatedStudent = await ctx.db.students.update({
+      where: { studentId },
+      data: {
+        ...data,
+        updatedAt: new Date(),
+      },
+    });
+    return updatedStudent;
+  } catch (error) {
+    console.error("Error updating student:", error);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Failed to update student",
+    });
+  }
+}),
 
   deleteStudentsByIds: publicProcedure
     .input(z.object({ studentIds: z.array(z.string().cuid()) }))

@@ -38,17 +38,13 @@ import { StudentDeletionDialog } from "../forms/student/StudentDeletion";
 import { PlusCircle, RefreshCw, Search } from "lucide-react";
 import { Skeleton } from "~/components/ui/skeleton";
 import { DownloadPdfButton } from "../ui/DownloadPdfButton";
+import type { Students } from "@prisma/client";
 
-type StudentProps = {
-  studentId: string;
+type StudentProps = Students & {
   registrationNumber: string;
   admissionNumber: string;
   studentName: string;
   fatherName: string;
-  gender: "MALE" | "FEMALE" | "CUSTOM";
-  dateOfBirth: string;
-  studentCNIC: string;
-  fatherCNIC: string;
   fatherMobile: string;
   profilePic?: string | null;
 };
@@ -79,27 +75,22 @@ const columns: ColumnDef<StudentProps>[] = [
   {
     accessorKey: "registrationNumber",
     header: "Registration #",
-    cell: ({ row }) => <span>{row.getValue("registrationNumber")}</span>,
   },
   {
     accessorKey: "admissionNumber",
     header: "Adm #",
-    cell: ({ row }) => <span>{row.getValue("admissionNumber")}</span>,
   },
   {
     accessorKey: "studentName",
     header: "Student Name",
-    cell: ({ row }) => <span>{row.getValue("studentName")}</span>,
   },
   {
     accessorKey: "fatherName",
     header: "Father Name",
-    cell: ({ row }) => <span>{row.getValue("fatherName")}</span>,
   },
   {
     accessorKey: "fatherMobile",
     header: "Father Mobile",
-    cell: ({ row }) => <span>{row.getValue("fatherMobile")}</span>
   },
   {
     accessorKey: "dateOfBirth",
@@ -112,12 +103,13 @@ const columns: ColumnDef<StudentProps>[] = [
   {
     accessorKey: "gender",
     header: "Gender",
-    cell: ({ row }) => <span>{row.getValue("gender")}</span>,
+    cell: ({ row }) => (
+      <span className="capitalize">{row.getValue("gender")?.toString().toLowerCase()}</span>
+    ),
   },
   {
     accessorKey: "studentCNIC",
     header: "B-Form #",
-    cell: ({ row }) => <span>{row.getValue("studentCNIC")}</span>,
   },
   {
     accessorKey: "createdAt",
@@ -136,15 +128,21 @@ const columns: ColumnDef<StudentProps>[] = [
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="w-8 h-8 p-0">
             <DotsHorizontalIcon className="w-4 h-4" />
+            <span className="sr-only">Open menu</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
-            <Link href={`/userReg/student/edit/${row.original.studentId}`}>
-              Edit
+            <Link href={`/admin/users/student/edit/${row.original.studentId}`}>
+              Edit Student
             </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => navigator.clipboard.writeText(row.original.admissionNumber)}
+          >
+            Copy Student ID
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -157,7 +155,7 @@ export const StudentTable = () => {
   const [rowSelection, setRowSelection] = useState({});
   const { data: students, refetch, isLoading } = api.student.getStudents.useQuery();
 
-  const table = useReactTable({
+  const table = useReactTable<StudentProps>({
     data: students ?? [],
     columns,
     onSortingChange: setSorting,
@@ -171,7 +169,7 @@ export const StudentTable = () => {
 
   return (
     <div className="w-full space-y-4">
-      {/* Enhanced Header */}
+      {/* Table Controls */}
       <div className="rounded-lg bg-white p-4 shadow-sm border">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="relative w-full max-w-md">
@@ -204,8 +202,8 @@ export const StudentTable = () => {
             />
             <CSVUploadDialog />
             <DownloadPdfButton
-              reportType={'students'}
-              data={(students ?? []) as unknown as Array<Record<string, unknown>>} // Add type assertion here
+              reportType="students"
+              data={students ?? []}
               headers={[
                 'studentId',
                 'studentName',
@@ -217,20 +215,18 @@ export const StudentTable = () => {
                 'fatherMobile',
                 'isAssign'
               ]}
-            />          <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
-              <Link href="/userReg/student/create" className="flex items-center gap-2">
+            />
+            <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Link href="/admin/users/student/create" className="flex items-center gap-2">
                 <PlusCircle className="h-4 w-4" />
                 New Student
               </Link>
-            </Button>
-            <Button asChild>
-              <Link href="/userReg/student/edit">View Cards</Link>
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Enhanced Table */}
+      {/* Main Table */}
       <div className="rounded-lg border bg-white shadow-sm">
         <Table>
           <TableHeader className="bg-gray-50">
@@ -286,7 +282,7 @@ export const StudentTable = () => {
         </Table>
       </div>
 
-      {/* Enhanced Footer */}
+      {/* Table Footer */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between px-4">
         <div className="text-sm text-gray-600">
           Showing {table.getFilteredRowModel().rows.length} students •{" "}

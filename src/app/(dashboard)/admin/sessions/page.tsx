@@ -25,8 +25,8 @@ const AnimatedNumber = ({ value }: { value: number }) => {
 export default function SessionFeePage() {
   const breadcrumbs = [
     { href: "/dashboard", label: "Dashboard" },
-    { href: "/academics", label: "Academics" },
-    { href: "/academics/sessionalDetails", label: "Sessional Details", current: true },
+    { href: "/admin/academics", label: "Academics" },
+    { href: "/admin/sessions", label: "Sessional Details", current: true },
   ];
 
   // Fetch data from various routers

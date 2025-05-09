@@ -123,7 +123,7 @@ export const SessionList = () => {
               </div>
 
               <Button asChild variant="outline" className="w-full">
-                <Link href={`/academics/sessionalDetails/${session.sessionId}`}>
+                <Link href={`/admin/sessions/${session.sessionId}`}>
                   View Session Details
                 </Link>
               </Button>

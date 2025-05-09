@@ -181,10 +181,10 @@ export function EmployeeTable() {
           />
           <CSVUploadDialog />
           <Button asChild>
-            <Link href="/userReg/faculty/create">Create</Link>
+            <Link href="/admin/users/faculty/create">Create</Link>
           </Button>
           <Button asChild>
-            <Link href="/userReg/faculty/edit">View Cards</Link>
+            <Link href="/admin/users/faculty/edit">View Cards</Link>
           </Button>
         </div>
       </div>

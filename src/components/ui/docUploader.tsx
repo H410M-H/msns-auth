@@ -8,7 +8,7 @@ import { FileText, File, X } from "lucide-react";
 
 interface BookUploaderProps {
   onUploadSuccess: (fileUrl: string) => void;
-  onRemove: () => void; // Add this line
+  onRemove: () => void;
   initialFile?: string;
 }
 
@@ -19,7 +19,7 @@ interface CloudinaryUploadResponse {
   };
 }
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const ACCEPTED_FILE_TYPES: Accept = {
   "application/pdf": [".pdf"],
   "application/msword": [".doc"],
@@ -28,7 +28,7 @@ const ACCEPTED_FILE_TYPES: Accept = {
   "application/vnd.openxmlformats-officedocument.presentationml.presentation": [".pptx"],
 };
 
-export const BookUploader = ({ onUploadSuccess, initialFile }: BookUploaderProps) => {
+export const BookUploader = ({ onUploadSuccess, onRemove, initialFile }: BookUploaderProps) => {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -57,14 +57,21 @@ export const BookUploader = ({ onUploadSuccess, initialFile }: BookUploaderProps
       if (!response.ok) {
         throw new Error(data.error?.message ?? "Upload failed");
       }
+
       setPreviewUrl(data.secure_url);
       onUploadSuccess(data.secure_url);
       setProgress(100);
     } catch (err) {
       console.error("Upload failed:", err);
-      setError(
-        err instanceof Error ? err.message : "File upload failed. Please try again."
-      );
+      
+      let errorMessage = "File upload failed. Please try again.";
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === "object" && err !== null && "message" in err) {
+        errorMessage = String(err.message);
+      }
+      
+      setError(errorMessage);
     } finally {
       setUploading(false);
     }
@@ -87,11 +94,19 @@ export const BookUploader = ({ onUploadSuccess, initialFile }: BookUploaderProps
           await handleUpload(selectedFile);
         } catch (err) {
           console.error("Upload error:", err);
-          setError("Failed to process file upload");
+          
+          let errorMessage = "Failed to process file upload";
+          if (err instanceof Error) {
+            errorMessage = err.message;
+          } else if (typeof err === "object" && err !== null && "message" in err) {
+            errorMessage = String(err.message);
+          }
+          
+          setError(errorMessage);
         }
       };
 
-      void handleFile(); // Explicitly void the promise
+      void handleFile();
     },
     [handleUpload]
   );
@@ -107,6 +122,7 @@ export const BookUploader = ({ onUploadSuccess, initialFile }: BookUploaderProps
     setFile(null);
     setPreviewUrl(null);
     onUploadSuccess("");
+    onRemove();
   };
 
   return (
@@ -118,10 +134,8 @@ export const BookUploader = ({ onUploadSuccess, initialFile }: BookUploaderProps
           ${error ? "border-red-500 bg-red-50" : ""}`}
       >
         <input {...getInputProps()} />
-        
         <div className="flex flex-col items-center gap-4">
           <File className="h-8 w-8 text-gray-500" />
-          
           <div>
             <p className="font-medium">
               {isDragActive ? "Drop here" : "Drag & drop or click to upload"}
@@ -130,7 +144,6 @@ export const BookUploader = ({ onUploadSuccess, initialFile }: BookUploaderProps
               Supported formats: PDF, DOC, DOCX, PPT, PPTX (max 10MB)
             </p>
           </div>
-          
           {file && (
             <div className="mt-4 flex items-center gap-2">
               <FileText className="h-4 w-4" />

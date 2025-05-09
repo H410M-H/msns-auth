@@ -24,7 +24,7 @@ const services: Services[] = [
     iconColor: "text-green-500",
     gradientFrom: "from-green-400",
     gradientTo: "to-green-700",
-    href: "/revenue/salary",
+    href: "/admin/revenue/salary",
   },
   {
     title: "Fee Management",

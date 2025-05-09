@@ -5,13 +5,8 @@ import Link from "next/link"
 import {
   BookOpen,
   Calendar,
-  GraduationCap,
   LayoutDashboard,
   School,
-  Settings,
-  Users,
-  DollarSign,
-  FileText,
   LogOut,
   UserCog,
 } from "lucide-react"
@@ -34,18 +29,19 @@ import {
 import { Button } from "~/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
 import { cn } from "~/lib/utils"
+import { useEffect } from "react"
 
-interface DashboardSidebarProps {
+interface AppSidebarProps {
   role: string;
   className?: string;
 }
 
-export function AppSidebar({ role, className }: DashboardSidebarProps) {
+export function AppSidebar({ role, className }: AppSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { signOut } = useClerk()
   const { user } = useUser()
-  const { isMobile } = useSidebar()
+  const { isMobile, state, toggleSidebar } = useSidebar()
 
   const isActive = (path: string) => {
     return pathname === path || pathname.startsWith(`${path}/`)
@@ -55,153 +51,163 @@ export function AppSidebar({ role, className }: DashboardSidebarProps) {
     await signOut(() => router.push("/sign-in"))
   }
 
-  // Get user name from Clerk
   const firstName = user?.firstName ?? ""
   const lastName = user?.lastName ?? ""
   const userName = `${firstName} ${lastName}`
+
+  // Close mobile sidebar when navigating
+  useEffect(() => {
+    if (isMobile) toggleSidebar()
+  }, [isMobile, pathname, toggleSidebar])
 
   return (
     <Sidebar 
       collapsible={isMobile ? "offcanvas" : "icon"} 
       variant="inset"
-      className={cn("flex h-auto top-16 z-40 shadow-lg", className)}
+      className={cn(
+        "h-full border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+        "transition-all duration-300 ease-in-out",
+        className
+      )}
     >
-      <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-3">
-          <School className="h-6 w-6 text-primary" />
-          <div className="font-bold text-xl">MSNS-LMS</div>
+      <SidebarHeader className="sticky top-10 z-10 bg-background/95 backdrop-blur">
+        <div className="flex items-center gap-3 px-4 py-4">
+          <School className="h-7 w-7 text-primary" />
+          <div 
+            className={cn(
+              "text-xl font-semibold transition-opacity",
+              state === "collapsed" && "opacity-0 pointer-events-none"
+            )}
+          >
+            MSNS-LMS
+          </div>
         </div>
         <SidebarSeparator />
       </SidebarHeader>
-      <SidebarContent className="flex-1 overflow-y-auto">
+
+      <SidebarContent className="flex-1 overflow-y-auto overflow-x-hidden">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}`)}>
+            <SidebarMenuButton 
+              asChild 
+              isActive={isActive(`/${role.toLowerCase()}`)}
+              tooltip="Dashboard"
+            >
               <Link href={`/${role.toLowerCase()}`}>
-                <LayoutDashboard />
-                <span>Dashboard</span>
+                <LayoutDashboard className="min-w-5" />
+                <span className="truncate">Dashboard</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
 
+          {/* Conditional menu items based on role */}
           {role === "admin" && (
-            <>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}/users`)}>
-                  <Link href={`/${role.toLowerCase()}/admin`}>
-                    <UserCog />
-                    <span>User Management</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </>
+            <SidebarMenuItem>
+              <SidebarMenuButton 
+                asChild 
+                isActive={isActive(`/${role.toLowerCase()}/users`)}
+                tooltip="User Management"
+              >
+                <Link href={`/${role.toLowerCase()}/admin`}>
+                  <UserCog className="min-w-5" />
+                  <span className="truncate">User Management</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
           )}
 
           {(role === "admin" || role === "clerk") && (
             <>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}/sessions`)}>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={isActive(`/${role.toLowerCase()}/sessions`)}
+                  tooltip="Sessions"
+                >
                   <Link href={`/${role.toLowerCase()}/sessions`}>
-                    <Calendar />
-                    <span>Sessions</span>
+                    <Calendar className="min-w-5" />
+                    <span className="truncate">Sessions</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}/classes`)}>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={isActive(`/${role.toLowerCase()}/classes`)}
+                  tooltip="Classes"
+                >
                   <Link href={`/${role.toLowerCase()}/classes`}>
-                    <BookOpen />
-                    <span>Classes</span>
+                    <BookOpen className="min-w-5" />
+                    <span className="truncate">Classes</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </>
           )}
 
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}/students`)}>
-              <Link href={`/${role.toLowerCase()}/students`}>
-                <GraduationCap />
-                <span>Students</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {/* Add other menu items following the same pattern */}
 
-          {(role === "admin" || role === "principal") && (
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}/employees`)}>
-                <Link href={`/${role.toLowerCase()}/employees`}>
-                  <Users />
-                  <span>Employees</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          )}
-
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}/subjects`)}>
-              <Link href={`/${role.toLowerCase()}/subjects`}>
-                <FileText />
-                <span>Subjects</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          {(role === "super-admin" || role === "admin" || role === "principal" || role === "clerk") && (
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}/fees`)}>
-                <Link href={`/${role.toLowerCase()}/fees`}>
-                  <DollarSign />
-                  <span>Fees</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          )}
-
-          {(role === "super-admin" || role === "admin" || role === "principal") && (
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}/salary`)}>
-                <Link href={`/${role.toLowerCase()}/salary`}>
-                  <DollarSign />
-                  <span>Salary</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          )}
-
-          {(role === "super-admin" || role === "admin") && (
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive(`/${role.toLowerCase()}/settings`)}>
-                <Link href={`/${role.toLowerCase()}/settings`}>
-                  <Settings />
-                  <span>Settings</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          )}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter className="border-t bg-sidebar-accent/10">
-        <SidebarSeparator />
-        <div className="p-2">
-          <div className="flex items-center gap-2 p-2">
-            <Avatar>
-              <AvatarImage src={user?.imageUrl ?? "/user.jpg"} alt={userName} />
-              <AvatarFallback>{userName.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">{userName}</span>
-              <span className="text-xs text-muted-foreground">{role}</span>
-            </div>
-            <Button variant="ghost" size="icon" className="ml-auto" onClick={handleLogout}>
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </SidebarFooter>
-      <SidebarRail className="hover:after:bg-primary/50" />
-      {isMobile && <SidebarTrigger className="absolute right-4 top-4 md:hidden" />}
+
+      <SidebarFooter className="sticky bottom-0 border-t bg-background/95 backdrop-blur">
+  <SidebarSeparator />
+  <div className="p-2">
+    <div className="flex items-center gap-3">
+      {/* Avatar with integrated logout button */}
+      <div className="relative group">
+        <Avatar className="border-2 border-primary/20 size-10">
+          <AvatarImage src={user?.imageUrl} alt={userName} />
+          <AvatarFallback className="bg-primary/10">
+            {userName.charAt(0)}
+          </AvatarFallback>
+        </Avatar>
+
+        {/* Collapsed state logout button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn(
+            "absolute -right-2 -top-2 size-7 rounded-full bg-background/90 p-1.5 shadow-sm transition-all",
+            "opacity-0 group-hover:opacity-100",
+            state !== "collapsed" && "hidden"
+          )}
+          onClick={handleLogout}
+          aria-label="Logout"
+        >
+          <LogOut className="size-3.5 text-muted-foreground" />
+        </Button>
+      </div>
+
+      {/* Expanded state user info */}
+      <div className={cn(
+        "flex flex-1 flex-col overflow-hidden transition-all",
+        state === "collapsed" ? "w-0 opacity-0" : "w-full opacity-100"
+      )}>
+        <span className="truncate text-sm font-medium">{userName}</span>
+        <span className="truncate text-xs text-muted-foreground">{role}</span>
+      </div>
+
+      {/* Expanded state logout button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className={cn(
+          "ml-auto hover:bg-primary/10",
+          state === "collapsed" && "hidden"
+        )}
+        onClick={handleLogout}
+        aria-label="Logout"
+      >
+        <LogOut className="size-4 text-muted-foreground" />
+      </Button>
+    </div>
+  </div>
+</SidebarFooter>
+
+      <SidebarRail className="hover:after:bg-primary/30" />
+      {/* <SidebarTrigger className="relative right-4 top-4 md:right-2 md:top-2" /> */}
     </Sidebar>
   )
 }

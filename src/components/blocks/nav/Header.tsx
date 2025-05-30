@@ -34,7 +34,7 @@ export default function Header({ className, ...props }: HeaderProps) {
   return (
     <header
       className={cn(
-        `fixed top-0 left-0 right-0 z-40 transition-all duration-300 ease-in-out`,
+        `fixed top-0 left-0 right-0 z-30 transition-all duration-300 ease-in-out`,
         scrolled ? 'bg-transparent backdrop-blur-md py-2' : 'bg-green-100/40 py-2',
         className
       )}
@@ -42,7 +42,7 @@ export default function Header({ className, ...props }: HeaderProps) {
     >
       <div className="container mx-auto px-4 flex items-center justify-between h-full">
         {/* Logo Section */}
-        <Link href="/" className="flex items-center">
+        <Link href="/sign-in" className="flex items-center">
           <Image
             src="https://res.cloudinary.com/dvvbxrs55/image/upload/v1729267533/Official_LOGO_grn_ic9ldd.png"
             alt="Logo"
@@ -52,28 +52,36 @@ export default function Header({ className, ...props }: HeaderProps) {
           />
         </Link>
 
-        {/* Navigation Links */}
+        {/* Navigation Links - Profile button moved here */}
         <nav className="hidden md:block">
           <ul className="flex space-x-4 text-black font-bold">
             <li>
-              <Link href="/dashboard">
+              <Link href="/admin">
                 <Button variant="ghost">Home</Button>
               </Link>
             </li>
             <li>
-              <Link href="/about">
-                <Button variant="ghost">About</Button>
+              <Link href="/admin/academics">
+                <Button variant="ghost">Academics</Button>
               </Link>
             </li>
             <li>
-              <Link href="">
+              <Link href="/contact">
                 <Button variant="ghost">Contact</Button>
               </Link>
             </li>
+            {/* Moved Profile button here */}
+            {isAuthenticated && (
+              <li>
+                <Link href="/account">
+                  <Button variant="ghost">Profile</Button>
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
 
-        {/* Action Buttons */}
+        {/* Action Buttons - Simplified */}
         <div className="flex items-center space-x-4">
           {isAuthenticated ? (
             <DropdownMenu>
@@ -91,9 +99,6 @@ export default function Header({ className, ...props }: HeaderProps) {
                 className="rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 transition-transform duration-300 ease-in-out"
               >
                 <DropdownMenuItem className="hover:bg-purple-100 focus:bg-purple-200">
-                  <Link href="/account">Profile</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="hover:bg-purple-100 focus:bg-purple-200">
                   <Link href="/settings">Settings</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="hover:bg-purple-100 focus:bg-purple-200">
@@ -101,18 +106,15 @@ export default function Header({ className, ...props }: HeaderProps) {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          ) : isDashboard ? (
-            <Link href="/account">
-              <Button variant="outline">Profile</Button>
-            </Link>
           ) : (
-            <Link href="/signup">
-              <Button variant="outline">Join Now</Button>
-            </Link>
+            !isDashboard && (
+              <Link href="/signup">
+                <Button variant="outline">Join Now</Button>
+              </Link>
+            )
           )}
         </div>
       </div>
     </header>
   )
 }
-

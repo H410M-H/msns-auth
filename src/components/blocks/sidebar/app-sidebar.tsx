@@ -5,9 +5,14 @@ import Link from "next/link"
 import {
   BookOpen,
   Calendar,
+  GraduationCap,
   LayoutDashboard,
-  School,
+  Settings,
+  Users,
+  DollarSign,
+  FileText,
   LogOut,
+  Shield,
   UserCog,
 } from "lucide-react"
 import { useClerk, useUser } from "@clerk/nextjs"
@@ -17,31 +22,30 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
-  SidebarRail,
   useSidebar,
 } from "~/components/ui/sidebar"
 import { Button } from "~/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
 import { cn } from "~/lib/utils"
-import { useEffect } from "react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "~/components/ui/dropdown-menu"
 
 interface AppSidebarProps {
-  role: string;
-  className?: string;
+  className?: string
+  role: string
 }
 
-export function AppSidebar({ role, className }: AppSidebarProps) {
+export const AppSidebar = ({ className, role }: AppSidebarProps) => {
   const pathname = usePathname()
   const router = useRouter()
   const { signOut } = useClerk()
   const { user } = useUser()
-  const { isMobile, state, toggleSidebar } = useSidebar()
+  const { isMobile } = useSidebar()
 
   const isActive = (path: string) => {
     return pathname === path || pathname.startsWith(`${path}/`)
@@ -51,163 +55,214 @@ export function AppSidebar({ role, className }: AppSidebarProps) {
     await signOut(() => router.push("/sign-in"))
   }
 
+  // User details
   const firstName = user?.firstName ?? ""
   const lastName = user?.lastName ?? ""
   const userName = `${firstName} ${lastName}`
 
-  // Close mobile sidebar when navigating
-  useEffect(() => {
-    if (isMobile) toggleSidebar()
-  }, [isMobile, pathname, toggleSidebar])
-
   return (
-    <Sidebar 
-      collapsible={isMobile ? "offcanvas" : "icon"} 
+    <Sidebar
+      collapsible={isMobile ? "offcanvas" : "icon"}
       variant="inset"
-      className={cn(
-        "h-full border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
-        "transition-all duration-300 ease-in-out",
-        className
-      )}
+      className={cn("flex h-auto top-16 z-40 shadow-lg", className)}
     >
-      <SidebarHeader className="sticky top-10 z-10 bg-background/95 backdrop-blur">
-        <div className="flex items-center gap-3 px-4 py-4">
-          <School className="h-7 w-7 text-primary" />
-          <div 
-            className={cn(
-              "text-xl font-semibold transition-opacity",
-              state === "collapsed" && "opacity-0 pointer-events-none"
-            )}
-          >
-            MSNS-LMS
-          </div>
-        </div>
-        <SidebarSeparator />
-      </SidebarHeader>
 
-      <SidebarContent className="flex-1 overflow-y-auto overflow-x-hidden">
+      <SidebarContent className="flex-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border">
         <SidebarMenu>
+          {/* Dashboard */}
           <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
-              isActive={isActive(`/${role.toLowerCase()}`)}
-              tooltip="Dashboard"
-            >
-              <Link href={`/${role.toLowerCase()}`}>
-                <LayoutDashboard className="min-w-5" />
-                <span className="truncate">Dashboard</span>
+            <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}`)}>
+              <Link href={`/dashboard/${role.toLowerCase()}`}>
+                <LayoutDashboard className="min-w-4" />
+                <span>Dashboard</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          {/* Conditional menu items based on role */}
-          {role === "admin" && (
-            <SidebarMenuItem>
-              <SidebarMenuButton 
-                asChild 
-                isActive={isActive(`/${role.toLowerCase()}/users`)}
-                tooltip="User Management"
-              >
-                <Link href={`/${role.toLowerCase()}/admin`}>
-                  <UserCog className="min-w-5" />
-                  <span className="truncate">User Management</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          )}
-
-          {(role === "admin" || role === "clerk") && (
+          {/* Role-based Navigation */}
+          {role === "super-admin" && (
             <>
               <SidebarMenuItem>
-                <SidebarMenuButton 
-                  asChild 
-                  isActive={isActive(`/${role.toLowerCase()}/sessions`)}
-                  tooltip="Sessions"
-                >
-                  <Link href={`/${role.toLowerCase()}/sessions`}>
-                    <Calendar className="min-w-5" />
-                    <span className="truncate">Sessions</span>
+                <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/users`)}>
+                  <Link href={`/dashboard/${role.toLowerCase()}/users`}>
+                    <UserCog className="min-w-4" />
+                    <span>User Management</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
               <SidebarMenuItem>
-                <SidebarMenuButton 
-                  asChild 
-                  isActive={isActive(`/${role.toLowerCase()}/classes`)}
-                  tooltip="Classes"
-                >
-                  <Link href={`/${role.toLowerCase()}/classes`}>
-                    <BookOpen className="min-w-5" />
-                    <span className="truncate">Classes</span>
+                <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/roles`)}>
+                  <Link href={`/dashboard/${role.toLowerCase()}/roles`}>
+                    <Shield className="min-w-4" />
+                    <span>Role Management</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </>
           )}
 
-          {/* Add other menu items following the same pattern */}
+          {(role === "super-admin" || role === "admin" || role === "principal") && (
+            <>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/sessions`)}>
+                  <Link href={`/dashboard/${role.toLowerCase()}/sessions`}>
+                    <Calendar className="min-w-4" />
+                    <span>Sessions</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
 
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/classes`)}>
+                  <Link href={`/dashboard/${role.toLowerCase()}/classes`}>
+                    <BookOpen className="min-w-4" />
+                    <span>Classes</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </>
+          )}
+
+          {/* Common Items */}
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/students`)}>
+              <Link href={`/dashboard/${role.toLowerCase()}/students`}>
+                <GraduationCap className="min-w-4" />
+                <span>Students</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          {(role === "super-admin" || role === "admin" || role === "principal") && (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/employees`)}>
+                <Link href={`/dashboard/${role.toLowerCase()}/employees`}>
+                  <Users className="min-w-4" />
+                  <span>Employees</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
+
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/subjects`)}>
+              <Link href={`/dashboard/${role.toLowerCase()}/subjects`}>
+                <FileText className="min-w-4" />
+                <span>Subjects</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          {/* Financial Sections */}
+          {(role === "super-admin" || role === "admin" || role === "principal" || role === "clerk") && (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/fees`)}>
+                <Link href={`/dashboard/${role.toLowerCase()}/fees`}>
+                  <DollarSign className="min-w-4" />
+                  <span>Fees</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
+
+          {(role === "super-admin" || role === "admin" || role === "principal") && (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/salary`)}>
+                <Link href={`/dashboard/${role.toLowerCase()}/salary`}>
+                  <DollarSign className="min-w-4" />
+                  <span>Salary</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
+
+          {/* Settings */}
+          {(role === "super-admin" || role === "admin") && (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/settings`)}>
+                <Link href={`/dashboard/${role.toLowerCase()}/settings`}>
+                  <Settings className="min-w-4" />
+                  <span>Settings</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="sticky bottom-0 border-t bg-background/95 backdrop-blur">
-  <SidebarSeparator />
-  <div className="p-2">
-    <div className="flex items-center gap-3">
-      {/* Avatar with integrated logout button */}
-      <div className="relative group">
-        <Avatar className="border-2 border-primary/20 size-10">
-          <AvatarImage src={user?.imageUrl} alt={userName} />
-          <AvatarFallback className="bg-primary/10">
-            {userName.charAt(0)}
-          </AvatarFallback>
-        </Avatar>
+      <SidebarFooter className="border-t bg-sidebar-accent/10">
+        <SidebarSeparator />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="h-10 w-10 rounded-full p-0 hover:bg-accent/50 focus-visible:ring-0 focus-visible:ring-offset-0"
+            >
+              <Avatar className="h-9 w-9 cursor-pointer border">
+                <AvatarImage src={user?.imageUrl} alt={userName} />
+                <AvatarFallback className="text-sm font-medium">
+                  {userName.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
 
-        {/* Collapsed state logout button */}
+          <DropdownMenuContent
+            className="w-56 rounded-lg border bg-background p-2 shadow-sm"
+            align="end"
+            sideOffset={8}
+          >
+            <DropdownMenuLabel className="p-2">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium">{userName}</p>
+                <p className="text-xs text-muted-foreground">{role}</p>
+              </div>
+            </DropdownMenuLabel>
+
+            <DropdownMenuSeparator className="my-2" />
+
+            <DropdownMenuItem asChild className="cursor-pointer rounded-md px-2 py-1.5">
+              <Link href={`/dashboard/${role.toLowerCase()}/profile`}>
+                <UserCog className="mr-2 h-4 w-4" />
+                <span>Profile Settings</span>
+              </Link>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem asChild className="cursor-pointer rounded-md px-2 py-1.5">
+              <Link href={`/dashboard/${role.toLowerCase()}/preferences`}>
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Preferences</span>
+              </Link>
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator className="my-2" />
+
+            <DropdownMenuItem
+              className="cursor-pointer rounded-md px-2 py-1.5 text-destructive hover:bg-destructive/10"
+              onClick={handleLogout}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Sign Out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <div className="flex flex-col overflow-hidden">
+          <span className="text-sm font-medium truncate">{userName}</span>
+          <span className="text-xs text-muted-foreground capitalize">{role}</span>
+        </div>
         <Button
           variant="ghost"
           size="icon"
-          className={cn(
-            "absolute -right-2 -top-2 size-7 rounded-full bg-background/90 p-1.5 shadow-sm transition-all",
-            "opacity-0 group-hover:opacity-100",
-            state !== "collapsed" && "hidden"
-          )}
+          className="ml-auto"
           onClick={handleLogout}
-          aria-label="Logout"
         >
-          <LogOut className="size-3.5 text-muted-foreground" />
+          <LogOut className="h-6 w-6" />
         </Button>
-      </div>
+      </SidebarFooter>
 
-      {/* Expanded state user info */}
-      <div className={cn(
-        "flex flex-1 flex-col overflow-hidden transition-all",
-        state === "collapsed" ? "w-0 opacity-0" : "w-full opacity-100"
-      )}>
-        <span className="truncate text-sm font-medium">{userName}</span>
-        <span className="truncate text-xs text-muted-foreground">{role}</span>
-      </div>
-
-      {/* Expanded state logout button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className={cn(
-          "ml-auto hover:bg-primary/10",
-          state === "collapsed" && "hidden"
-        )}
-        onClick={handleLogout}
-        aria-label="Logout"
-      >
-        <LogOut className="size-4 text-muted-foreground" />
-      </Button>
-    </div>
-  </div>
-</SidebarFooter>
-
-      <SidebarRail className="hover:after:bg-primary/30" />
-      {/* <SidebarTrigger className="relative right-4 top-4 md:right-2 md:top-2" /> */}
+      <SidebarRail className="hover:after:bg-primary/50" />
+      <SidebarTrigger className="absolute right-4 top-4 md:hidden" />
     </Sidebar>
   )
 }

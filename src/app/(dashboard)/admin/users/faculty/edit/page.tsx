@@ -4,7 +4,7 @@ import { Separator } from "~/components/ui/separator";
 
 export default function EmployeeCards() {
     const breadcrumbs = [
-        { href: "/dashboard", label: "Dashboard", },
+        { href: "/admin", label: "Dashboard", },
         { href: "/academics", label: "Academics", },
         { href: "/userReg/faculty/edit", label: "Registered Employees", current: true },
       ]

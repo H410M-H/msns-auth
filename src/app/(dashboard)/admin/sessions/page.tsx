@@ -24,7 +24,7 @@ const AnimatedNumber = ({ value }: { value: number }) => {
 
 export default function SessionFeePage() {
   const breadcrumbs = [
-    { href: "/dashboard", label: "Dashboard" },
+    { href: "/admin", label: "Dashboard" },
     { href: "/admin/academics", label: "Academics" },
     { href: "/admin/sessions", label: "Sessional Details", current: true },
   ];

@@ -71,8 +71,8 @@ export const AppSidebar = ({ className, role }: AppSidebarProps) => {
         <SidebarMenu>
           {/* Dashboard */}
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}`)}>
-              <Link href={`/dashboard/${role.toLowerCase()}`}>
+            <SidebarMenuButton asChild isActive={isActive(`/admin/${role.toLowerCase()}`)}>
+              <Link href={`/${role.toLowerCase()}`}>
                 <LayoutDashboard className="min-w-4" />
                 <span>Dashboard</span>
               </Link>
@@ -80,11 +80,11 @@ export const AppSidebar = ({ className, role }: AppSidebarProps) => {
           </SidebarMenuItem>
 
           {/* Role-based Navigation */}
-          {role === "super-admin" && (
+          {role === "admin" && (
             <>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/users`)}>
-                  <Link href={`/dashboard/${role.toLowerCase()}/users`}>
+                <SidebarMenuButton asChild isActive={isActive(`/admin/${role.toLowerCase()}/users`)}>
+                  <Link href={`/${role.toLowerCase()}/users`}>
                     <UserCog className="min-w-4" />
                     <span>User Management</span>
                   </Link>
@@ -92,8 +92,8 @@ export const AppSidebar = ({ className, role }: AppSidebarProps) => {
               </SidebarMenuItem>
 
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/roles`)}>
-                  <Link href={`/dashboard/${role.toLowerCase()}/roles`}>
+                <SidebarMenuButton asChild isActive={isActive(`/admin/${role.toLowerCase()}/users`)}>
+                  <Link href={`/${role.toLowerCase()}/users/faculty/view`}>
                     <Shield className="min-w-4" />
                     <span>Role Management</span>
                   </Link>
@@ -102,11 +102,11 @@ export const AppSidebar = ({ className, role }: AppSidebarProps) => {
             </>
           )}
 
-          {(role === "super-admin" || role === "admin" || role === "principal") && (
+          {( role === "admin" || role === "principal") && (
             <>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/sessions`)}>
-                  <Link href={`/dashboard/${role.toLowerCase()}/sessions`}>
+                <SidebarMenuButton asChild isActive={isActive(`/admin/${role.toLowerCase()}/sessions`)}>
+                  <Link href={`/${role.toLowerCase()}/sessions`}>
                     <Calendar className="min-w-4" />
                     <span>Sessions</span>
                   </Link>
@@ -114,8 +114,8 @@ export const AppSidebar = ({ className, role }: AppSidebarProps) => {
               </SidebarMenuItem>
 
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/classes`)}>
-                  <Link href={`/dashboard/${role.toLowerCase()}/classes`}>
+                <SidebarMenuButton asChild isActive={isActive(`/admin/${role.toLowerCase()}/sessions`)}>
+                  <Link href={`/${role.toLowerCase()}/sessions/class`}>
                     <BookOpen className="min-w-4" />
                     <span>Classes</span>
                   </Link>
@@ -126,7 +126,7 @@ export const AppSidebar = ({ className, role }: AppSidebarProps) => {
 
           {/* Common Items */}
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/students`)}>
+            <SidebarMenuButton asChild isActive={isActive(`/admin/${role.toLowerCase()}/students`)}>
               <Link href={`/dashboard/${role.toLowerCase()}/students`}>
                 <GraduationCap className="min-w-4" />
                 <span>Students</span>

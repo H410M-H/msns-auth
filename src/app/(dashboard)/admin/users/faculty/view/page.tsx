@@ -4,9 +4,9 @@ import { Separator } from "~/components/ui/separator";
 
 export default function EmployeesTable() {
     const breadcrumbs = [
-        { href: "/dashboard", label: "Dashboard", },
+        { href: "/admin", label: "Dashboard", },
         { href: "/academics", label: "Academics", },
-        { href: "/userReg/faculty/create", label: "Employee Registration", current: true },
+        { href: "/admin/users/faculty/create", label: "Employee Registration", current: true },
       ]
     
     return (

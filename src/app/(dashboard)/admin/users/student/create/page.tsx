@@ -4,7 +4,7 @@ import StudentCreationDialog from "~/components/forms/student/StudentCreation";
 
 export default function StudentRegistration(){
     const breadcrumbs = [
-        { href: "/dashboard", label: "Dashboard", },
+        { href: "/admin", label: "Dashboard", },
         { href: "/academics", label: "Academics", },
         { href: "/admin/usres/student/view", label: "Student Registration", current: true },
       ]

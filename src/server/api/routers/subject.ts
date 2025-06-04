@@ -93,11 +93,25 @@ export const SubjectRouter = createTRPCRouter({
   // In subject.ts, update the getSubjectsByClass procedure
 getSubjectsByClass: publicProcedure
 .input(z.object({ 
-  classId: z.string().cuid(),
-  sessionId: z.string().cuid() 
+  classId: z.string().cuid().optional(), // Made optional to handle undefined/null from client
+  sessionId: z.string().cuid().optional() // Made optional to handle undefined/null from client
 }))
 .query(async ({ ctx, input }) => {
   try {
+    // Explicitly check if classId and sessionId are provided, as they are required for the query
+    if (!input.classId) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "classId is required to fetch subjects by class.",
+      });
+    }
+    if (!input.sessionId) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "sessionId is required to fetch subjects by class.",
+      });
+    }
+
     const classSubjects = await ctx.db.classSubject.findMany({
       where: { 
         classId: input.classId,

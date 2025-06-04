@@ -95,8 +95,8 @@ export const AllotmentRouter = createTRPCRouter({
   getStudentsByClassAndSession: publicProcedure
     .input(
       z.object({
-        classId: z.string().cuid(),
-        sessionId: z.string().cuid(),
+        classId: z.string().cuid().optional(), // Made optional to handle undefined/null from client
+        sessionId: z.string().cuid().optional(), // Made optional to handle undefined/null from client
         page: z.number().min(1).default(1),
         pageSize: z.number().min(1).max(100).default(20),
       })
@@ -105,6 +105,20 @@ export const AllotmentRouter = createTRPCRouter({
       [x: string]: unknown; data: StudentClassWithRelations[]; meta: PaginationMeta 
 }>(async ({ ctx, input }) => {
       try {
+        // Explicitly check if classId and sessionId are provided, as they are required for the query
+        if (!input.classId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "classId is required to fetch students by class and session.",
+          });
+        }
+        if (!input.sessionId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "sessionId is required to fetch students by class and session.",
+          });
+        }
+
         const [data, total] = await Promise.all([
           ctx.db.studentClass.findMany({
             where: {

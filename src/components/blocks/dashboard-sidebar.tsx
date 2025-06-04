@@ -5,7 +5,6 @@ import Link from "next/link"
 import {
   BookOpen,
   Calendar,
-  GraduationCap,
   LayoutDashboard,
   School,
   Settings,
@@ -119,16 +118,6 @@ export function DashboardSidebar({ role }: DashboardSidebarProps) {
               </SidebarMenuItem>
             </>
           )}
-
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/students`)}>
-              <Link href={`/dashboard/${role.toLowerCase()}/students`}>
-                <GraduationCap />
-                <span>Students</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
           {(role === "super-admin" || role === "admin" || role === "principal") && (
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={isActive(`/dashboard/${role.toLowerCase()}/employees`)}>

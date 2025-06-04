@@ -19,8 +19,9 @@ interface PageHeaderProps {
 
 export function PageHeader({ breadcrumbs }: PageHeaderProps) {
   return (
-    <header className="sticky left-auto z-30 flex h-12 md:h-16 w-full items-center bg-gradient-to-r from-emerald-200 via-emerald-400 to-green-700 px-4 md:px-6 shadow-md rounded-lg">
       <div className="flex items-center w-full max-w-screen-2xl mx-auto">
+            <header className="sticky left-auto z-30 flex h-12 md:h-16 w-full items-center bg-gradient-to-r from-emerald-200 via-emerald-400 to-green-700 px-4 md:px-6 shadow-md rounded-lg">
+
         <SidebarTrigger className="mr-2 md:mr-4 shrink-0" />
         
         <Breadcrumb className="flex-1 min-w-0">
@@ -29,7 +30,7 @@ export function PageHeader({ breadcrumbs }: PageHeaderProps) {
               <React.Fragment key={crumb.href}>
                 <BreadcrumbItem className="max-w-[120px] md:max-w-none truncate">
                   <BreadcrumbLink href={crumb.href}>
-                    <BreadcrumbPage className="text-xs md:text-sm font-medium truncate">
+                    <BreadcrumbPage className="text-md md:text-sm font-medium truncate">
                       {index === 0 ? (
                         <span className="hidden md:inline">{crumb.label}</span>
                       ) : (
@@ -45,7 +46,8 @@ export function PageHeader({ breadcrumbs }: PageHeaderProps) {
             ))}
           </BreadcrumbList>
         </Breadcrumb>
-      </div>
     </header>
+    </div>
+
   );
 }

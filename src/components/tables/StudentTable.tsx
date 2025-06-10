@@ -213,7 +213,6 @@ export const StudentTable = () => {
                 'gender',
                 'fatherName',
                 'fatherMobile',
-                'isAssign'
               ]}
             />
             <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
@@ -222,6 +221,9 @@ export const StudentTable = () => {
                 New Student
               </Link>
             </Button>
+            <Button asChild>
+            <Link href="/admin/users/student/edit">View Cards</Link>
+          </Button>
           </div>
         </div>
       </div>

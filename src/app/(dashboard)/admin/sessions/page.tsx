@@ -25,8 +25,7 @@ const AnimatedNumber = ({ value }: { value: number }) => {
 export default function SessionFeePage() {
   const breadcrumbs = [
     { href: "/admin", label: "Dashboard" },
-    { href: "/admin/academics", label: "Academics" },
-    { href: "/admin/sessions", label: "Sessional Details", current: true },
+    { href: "/admin/sessions", label: "Sessions", current: true },
   ];
 
   // Fetch data from various routers
@@ -40,32 +39,32 @@ export default function SessionFeePage() {
   const totalRevenue = feeData?.reduce((acc, fee) => acc + fee.tuitionFee, 0) ?? 0;
 
   const stats = [
-    { 
-      title: "Total Students", 
+    {
+      title: "Total Students",
       value: studentData?.length ?? 0,
       icon: Users,
       color: "bg-green-100 text-green-600"
     },
-    { 
-      title: "Total Classes", 
+    {
+      title: "Total Classes",
       value: classData?.length ?? 0,
       icon: School,
       color: "bg-purple-100 text-purple-600"
     },
-    { 
-      title: "Active Employees", 
+    {
+      title: "Active Employees",
       value: employeeData?.length ?? 0,
       icon: GraduationCap,
       color: "bg-yellow-100 text-yellow-600"
     },
-    { 
-      title: "Courses Offered", 
+    {
+      title: "Courses Offered",
       value: subjectData?.length ?? 0,
       icon: BookOpen,
       color: "bg-pink-100 text-pink-600"
     },
-    { 
-      title: "Total Revenue", 
+    {
+      title: "Total Revenue",
       value: totalRevenue,
       icon: DollarSign,
       color: "bg-teal-100 text-teal-600",
@@ -77,8 +76,8 @@ export default function SessionFeePage() {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <PageHeader breadcrumbs={breadcrumbs} />
 
-      <div className="px-6 pt-20">
-        <motion.section 
+      <div className="px-6 p-6">
+        <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -95,14 +94,14 @@ export default function SessionFeePage() {
             >
               <Card className="flex flex-col justify-between p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -translate-x-full group-hover:translate-x-0" />
-                
-                <CardHeader className="flex items-center justify-between space-y-0 pb-4">
+
+                <CardHeader className="flex items-center justify-between space-y-0">
                   <motion.div whileHover={{ x: 2 }}>
                     <CardTitle className="text-sm font-medium text-gray-700">
                       {stat.title}
                     </CardTitle>
                   </motion.div>
-                  <motion.div 
+                  <motion.div
                     className={`h-10 w-10 flex items-center justify-center rounded-full ${stat.color}`}
                     whileHover={{ rotate: 360, scale: 1.1 }}
                     transition={{ type: "spring" }}
@@ -119,7 +118,7 @@ export default function SessionFeePage() {
                       <Skeleton className="h-8 w-3/4" />
                     </motion.div>
                   ) : (
-                    <motion.div 
+                    <motion.div
                       className="text-2xl font-extrabold text-gray-900"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -137,18 +136,15 @@ export default function SessionFeePage() {
             </motion.div>
           ))}
         </motion.section>
-      </div>
-
-      {/* Session Management Section */}
-      <div className="px-6 pb-6">
+        {/* Session Management Section */}
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
+          <div className="bg-gradient-to-r from-blue-100/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <Card className="bg-white shadow-lg rounded-xl overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
             <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-100/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <CardTitle className="text-2xl font-bold text-gray-800 relative">
                 <motion.div
                   whileHover={{ x: 5 }}
@@ -162,7 +158,7 @@ export default function SessionFeePage() {
                     animate={{ opacity: 1 }}
                     className="ml-4 text-sm font-normal text-gray-500 inline-block"
                   >
-                    Current Session: {sessionData.sessionName} 
+                    Current Session: {sessionData.sessionName}
                     <span className="mx-2">•</span>
                     {new Date(sessionData.sessionFrom).getFullYear()}–
                     {new Date(sessionData.sessionTo).getFullYear()}

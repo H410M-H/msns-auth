@@ -6,7 +6,7 @@ export default function StudentsTable() {
     const breadcrumbs = [
         { href: "/dashboard", label: "Dashboard", },
         { href: "/admin/academics", label: "Academics", },
-        { href: "/admin/usres/student", label: "Registered Students", current: true },
+        { href: "/admin/users/student", label: "Registered Students", current: true },
       ]
       
       return (

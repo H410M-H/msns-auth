@@ -102,7 +102,7 @@ export const AppSidebar = ({ className, role }: AppSidebarProps) => {
             </>
           )}
 
-          {( role === "admin" || role === "principal") && (
+          {( role === "admin" || role === "clerk") && (
             <>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isActive(`/admin/${role.toLowerCase()}/sessions`)}>
@@ -115,7 +115,7 @@ export const AppSidebar = ({ className, role }: AppSidebarProps) => {
 
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isActive(`/admin/${role.toLowerCase()}/sessions`)}>
-                  <Link href={`/${role.toLowerCase()}/sessions/class`}>
+                  <Link href={`/admin/${role.toLowerCase()}/sessions/class`}>
                     <BookOpen className="min-w-4" />
                     <span>Classes</span>
                   </Link>

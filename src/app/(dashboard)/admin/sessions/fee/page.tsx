@@ -11,7 +11,6 @@ export default async function FeeDetailsPage({ searchParams }: PageProps) {
   const searchProps = await searchParams;
   const breadcrumbs = [
     { href: "/dashboard", label: "Dashboard" },
-    { href: "/academics", label: "Academics" },
     { href: "/academics/sessionalDetails", label: "Session Details", current: true },
   ];
   return (

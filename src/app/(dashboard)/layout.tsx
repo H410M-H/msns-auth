@@ -17,24 +17,21 @@ export default async function DashboardLayout({
     <TRPCReactProvider>
       <UserProvider>
         <SidebarProvider>
-          <div className="sticky flex w-full z-20 min-h-screen flex-col">
+          <div className="sticky w-full z-20 min-h-screen flex-col">
             <Header />
             
-            <div className="flex ">
-              <AppSidebar role="admin" />
-              
-              <SidebarInset className="flex">
-                <main className="overflow-x-hidden pt-4 transition-[margin] duration-300">
-                  <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    {children}
-                  </div>
+            <div className="flex">
+              <AppSidebar role={"admin"}  />
+              <SidebarInset className="flex w-screen">
+                <main className=" pt-6 transition-[margin] duration-300">
+                    <main className="flex-1 p-4 md:p-6 lg:p-8 min-h-screen bg-gray-50">
+                      {children}
+                    </main>
                 </main>
               </SidebarInset>
             </div>
-
             <Footer className="mt-auto border-t" />
           </div>
-          
           <Toaster position="top-right" richColors />
         </SidebarProvider>
       </UserProvider>

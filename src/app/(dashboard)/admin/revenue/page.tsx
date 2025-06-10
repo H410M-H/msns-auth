@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 
 export default function RevenuePage() {
   const breadcrumbs = [
-    { href: "/dashboard", label: "Dashboard" },
+    { href: "/admin", label: "Dashboard" },
     { href: "/admin/revenue", label: "Revenue", current: true },
   ];
 

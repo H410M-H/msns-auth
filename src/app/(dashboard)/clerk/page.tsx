@@ -1,9 +1,7 @@
 
 
-import { DollarSign, FileText, Users, BarChart } from 'lucide-react'
 import { PageHeader } from '~/components/blocks/nav/PageHeader'
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '~/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import { AlumniCards } from '~/components/cards/AlumniCard'
 
 export default async function ClerkDashboard() {
 
@@ -18,7 +16,8 @@ export default async function ClerkDashboard() {
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Clerk Dashboard</h2>
       </div>
-      <Tabs defaultValue="overview" className="mt-6 space-y-6">
+      <AlumniCards />
+      {/* <Tabs defaultValue="overview" className="mt-6 space-y-6">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="fees">Fee Management</TabsTrigger>
@@ -130,7 +129,7 @@ export default async function ClerkDashboard() {
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
+      </Tabs> */}
     </div>
   )
 }

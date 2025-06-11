@@ -1,4 +1,4 @@
-# Create T3 App
+# MSNS-LMS with clerk Auth 
 
 This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
 

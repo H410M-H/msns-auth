@@ -179,7 +179,7 @@ export default function EmployeeCredDetails() {
                         <div className="flex items-center space-x-2">
                           <Mail className="w-4 h-4 text-gray-400" />
                           <span className="text-sm text-gray-600">
-                            {employee.employeeName.toLowerCase().replace(" ", ".")}@msns.edu.pk
+                            {employee.admissionNumber.toLowerCase().replace(" ", ".")}@msns.edu.pk
                           </span>
                         </div>
                       </div>

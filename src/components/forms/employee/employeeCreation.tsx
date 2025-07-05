@@ -25,7 +25,7 @@ const employeeSchema = z.object({
   cnic: z.string().regex(/^\d{5}-\d{7}-\d$/, "Invalid CNIC format"),
   maritalStatus: z.enum(["Married", "Unmarried", "Widow", "Divorced"]),
   doj: z.string({ message: "Date of Joining is required" }),
-  designation: z.enum(["Principal", "Admin", "Head", "Clerk", "Teacher", "Worker"]),
+  designation: z.enum(["PRINCIPAL", "ADMIN", "HEAD", "CLERK", "TEACHER", "WORKER"]),
   residentialAddress: z.string().min(5, "Residential Address must be at least 5 characters"),
   mobileNo: z.string().regex(/^(\+92|0)?3\d{9}$/, "Invalid Pakistani mobile number format"),
   additionalContact: z.string().regex(/^(\+92|0)?3\d{9}$/, "Invalid Pakistani mobile number format").optional(),
@@ -46,7 +46,7 @@ export default function EmployeeCreationDialog() {
     defaultValues: {
       gender: "MALE",
       maritalStatus: "Unmarried",
-      designation: "Teacher",
+      designation: "TEACHER",
     },
   });
 
@@ -314,12 +314,12 @@ export default function EmployeeCreationDialog() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Principal">Principal</SelectItem>
-                            <SelectItem value="Admin">Admin</SelectItem>
-                            <SelectItem value="Head">Head</SelectItem>
-                            <SelectItem value="Clerk">Clerk</SelectItem>
-                            <SelectItem value="Teacher">Teacher</SelectItem>
-                            <SelectItem value="Worker">Worker</SelectItem>
+                            <SelectItem value="PRINCIPAL">Principal</SelectItem>
+                            <SelectItem value="ADMIN">Admin</SelectItem>
+                            <SelectItem value="HEAD">Head</SelectItem>
+                            <SelectItem value="CLERK">Clerk</SelectItem>
+                            <SelectItem value="TEACHER">Teacher</SelectItem>
+                            <SelectItem value="WORKER">Worker</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

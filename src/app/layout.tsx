@@ -1,9 +1,9 @@
 import "~/styles/globals.css";
-import {
-  ClerkProvider,
-} from '@clerk/nextjs'
+
 import { Geist_Mono } from 'next/font/google'
 import { type Metadata } from "next";
+import { SessionProvider } from "next-auth/react";
+import { TRPCReactProvider } from "~/trpc/react";
 
 // const geistSans = Geist({
 //   variable: '--font-geist-sans',
@@ -26,12 +26,14 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider>
       <html lang="en">
-        <body className={`${geistMono.variable} antialiased`}>
+        <TRPCReactProvider>
+                  <SessionProvider >
+                  <body className={`${geistMono.variable} antialiased`}>
           {children}
         </body>
+        </SessionProvider>
+        </TRPCReactProvider>
       </html>
-    </ClerkProvider>
   )
 }

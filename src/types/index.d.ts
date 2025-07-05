@@ -1,3 +1,16 @@
+type AccountTypeEnum = "ADMIN" | "PRINCIPAL" | "HEAD" | "CLERK" | "TEACHER" | "WORKER" | "STUDENT" | "ALL" | "NONE";
+
+type NavItem = {
+    title: string;
+    url: string;
+    icon?: LucideIcon;
+    isActive?: boolean;
+    items?: {
+        title: string;
+        url: string;
+    }[];
+};
+
 type ClassProps = {
   sessionId?: string;
   classId: string;
@@ -28,7 +41,7 @@ type StudentProps = {
   medicalProblem?: string | null;
   profilePic?: string | null;
   isAssign: boolean;
-  createdAt: string  | Date;
+  createdAt: string | Date;
   updatedAt: string | Date;
   discount: number;
   discountByPercent: number;
@@ -45,7 +58,7 @@ type EmployeeProps = {
   cnic: string;
   maritalStatus: "Married" | "Unmarried" | "Widow" | "Divorced";
   doj: string;
-  designation: "Principal" | "Admin" | "Head" | "Clerk" | "Teacher" | "Worker";
+  designation: "ADMIN" | "PRINCIPAL" | "HEAD" | "CLERK" | "TEACHER" | "WORKER" | "STUDENT";
   residentialAddress: string;
   mobileNo: string;
   additionalContact?: string | null;

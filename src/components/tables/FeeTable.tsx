@@ -179,7 +179,12 @@ const columns: ColumnDef<FeeProps>[] = [
     header: "Created At",
     cell: ({ getValue }) => {
       const rawValue = getValue();
-      const date = rawValue instanceof Date ? rawValue : new Date(rawValue);
+      const date =
+        rawValue instanceof Date
+          ? rawValue
+          : typeof rawValue === "string" || typeof rawValue === "number"
+          ? new Date(rawValue)
+          : new Date();
       return (
         <span className="text-sm text-gray-500">
           {format(date, "dd MMM yyyy HH:mm")}

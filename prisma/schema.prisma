@@ -8,12 +8,13 @@ datasource db {
 }
 
 model User {
-  id          String       @id @default(cuid())
+  id          String      @id @default(cuid())
+  email       String      @unique
   accountId   String
-  accountType Designation  @default(Teacher)
-  createdAt   DateTime     @default(now())
+  accountType Designation @default(ADMIN)
+  createdAt   DateTime    @default(now())
   password    String
-  username    String       @unique
+  username    String      @unique
 }
 
 model ClassSubject {
@@ -56,11 +57,11 @@ model FeeStudentClass {
   sfcId               String       @id @default(cuid())
   studentClassId      String
   feeId               String
-    tuitionPaid       Boolean @default(false)
-  examFundPaid      Boolean @default(false)
-  computerLabPaid   Boolean @default(false)
-  studentIdCardPaid Boolean @default(false)
-  infoAndCallsPaid  Boolean @default(false)
+  tuitionPaid         Boolean      @default(false)
+  examFundPaid        Boolean      @default(false)
+  computerLabPaid     Boolean      @default(false)
+  studentIdCardPaid   Boolean      @default(false)
+  infoAndCallsPaid    Boolean      @default(false)
   discount            Float        @default(0)
   discountByPercent   Float        @default(0)
   discountDescription String
@@ -183,12 +184,16 @@ enum ClassCategory {
 }
 
 enum Designation {
-  Principal
-  Admin
-  Head
-  Clerk
-  Teacher
-  Worker
+  PRINCIPAL
+  ADMIN
+  HEAD
+  CLERK
+  TEACHER
+  WORKER
+  NONE
+  ALL
+  STUDENT
+  FACULTY
 }
 
 enum FeeCategory {

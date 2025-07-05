@@ -184,7 +184,7 @@ export default function StudentCredDetails() {
                         <div className="flex items-center space-x-2">
                           <Mail className="w-4 h-4 text-gray-400" />
                           <span className="text-sm text-gray-600">
-                            {student.studentName.toLowerCase().replace(" ", ".")}@student.msns.edu.pk
+                            {student.admissionNumber.toLowerCase().replace(" ", ".")}@msns.edu.pk
                           </span>
                         </div>
                       </div>

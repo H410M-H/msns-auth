@@ -2,6 +2,8 @@ import { TRPCError } from "@trpc/server"
 import { createTRPCRouter, publicProcedure } from "../trpc"
 import { z } from "zod"
 import { generatePdf } from "~/lib/pdf-reports"
+import { userReg } from "~/lib/utils"
+import { hash } from "bcrypt"
 
 const employeeSchema = z.object({
   employeeName: z.string().min(2).max(100),
@@ -11,7 +13,7 @@ const employeeSchema = z.object({
   cnic: z.string().length(15),
   maritalStatus: z.enum(["Married", "Unmarried", "Widow", "Divorced"]),
   doj: z.string(),
-  designation: z.enum(["Principal", "Admin", "Head", "Clerk", "Teacher", "Worker"]),
+  designation: z.enum(["ADMIN", "PRINCIPAL", "HEAD", "CLERK", "TEACHER", "WORKER"]),
   residentialAddress: z.string(),
   mobileNo: z.string().max(13),
   additionalContact: z.string().max(13).optional(),
@@ -53,44 +55,27 @@ export const EmployeeRouter = createTRPCRouter({
 
   createEmployee: publicProcedure.input(employeeSchema).mutation(async ({ ctx, input }) => {
     try {
-      const currentYear = new Date().getFullYear().toString().slice(-2)
-      const latestEmployee = await ctx.db.employees.findFirst({
+      const usersCount = await ctx.db.user.count({
         where: {
-          registrationNumber: {
-            startsWith: `MSNF${currentYear}`,
-          },
-        },
-        orderBy: {
-          registrationNumber: "desc",
-        },
+          accountType: input.designation as AccountTypeEnum,
+        }
       })
-      let newRegNumber
-      if (latestEmployee) {
-        const latestNumber = Number.parseInt(latestEmployee.registrationNumber.slice(-3))
-        newRegNumber = `MSNF${currentYear}${(latestNumber + 1).toString().padStart(3, "0")}`
-      } else {
-        newRegNumber = `MSNF${currentYear}001`
-      }
-
-      // Generate admission number
-      const latestAdmission = await ctx.db.employees.findFirst({
-        orderBy: {
-          admissionNumber: "desc",
-        },
-      })
-      let newAdmissionNumber
-      if (latestAdmission) {
-        const latestNumber = Number.parseInt(latestAdmission.admissionNumber.slice(-3))
-        newAdmissionNumber = `${currentYear}${(latestNumber + 1).toString().padStart(3, "0")}`
-      } else {
-        newAdmissionNumber = `${currentYear}001`
-      }
-
+      const userInfo = userReg(usersCount, input.designation)
       const newEmployee = await ctx.db.employees.create({
         data: {
           ...input,
-          registrationNumber: newRegNumber,
-          admissionNumber: newAdmissionNumber,
+          registrationNumber: userInfo.accountId,
+          admissionNumber: userInfo.admissionNumber,
+        },
+      })
+      const password = await hash(userInfo.admissionNumber, 10)
+      await ctx.db.user.create({
+        data: {
+          accountId: userInfo.accountId,
+          username: userInfo.username,
+          email: userInfo.email.toLowerCase(),
+          password,
+          accountType: input.designation as AccountTypeEnum,
         },
       })
       return newEmployee
@@ -130,7 +115,7 @@ export const EmployeeRouter = createTRPCRouter({
   getEmployeesByDesignation: publicProcedure
     .input(
       z.object({
-        designation: z.enum(["Principal", "Admin", "Head", "Clerk", "Teacher", "Worker"]),
+        designation: z.enum(["ADMIN", "PRINCIPAL", "HEAD", "CLERK", "TEACHER", "WORKER"]),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -149,7 +134,7 @@ export const EmployeeRouter = createTRPCRouter({
       }
     }),
 
-    generateEmployeeReport: publicProcedure
+  generateEmployeeReport: publicProcedure
     .query(async ({ ctx }) => {
       const employees = await ctx.db.employees.findMany();
       const headers = [
@@ -158,11 +143,11 @@ export const EmployeeRouter = createTRPCRouter({
         { key: 'designation', label: 'Designation' },
         { key: 'registrationNumber', label: 'Registration Number' }
       ];
-      
+
       return {
         pdf: await generatePdf(employees, headers, 'Employee Report')
       };
-  }),
+    }),
 })
 
 

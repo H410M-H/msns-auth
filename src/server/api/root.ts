@@ -9,8 +9,10 @@ import { ClassRouter } from "./routers/class";
 import { feeRouter } from "./routers/fee";
 import { uploadRouter } from "./routers/upload";
 import { AllotmentRouter } from "./routers/allotment";
+import { UserRouter } from "./routers/user";
 
 export const appRouter = createTRPCRouter({
+  user: UserRouter,
   upload: uploadRouter,
   alotment: AllotmentRouter,
   student: StudentRouter,

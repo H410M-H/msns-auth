@@ -3,6 +3,8 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 import { z } from "zod";
 import { generatePdf } from "~/lib/pdf-reports";
 import { type Prisma } from "@prisma/client";
+import { userReg } from "~/lib/utils";
+import { hash } from "bcrypt";
 
 
 type StudentReportData = {
@@ -165,61 +167,33 @@ export const StudentRouter = createTRPCRouter({
   createStudent: publicProcedure
     .input(studentSchema)
     .mutation(async ({ ctx, input }) => {
-      try {
-        const currentYear = new Date().getFullYear().toString().slice(-2);
+try {
+      const usersCount = await ctx.db.user.count({
+        where: {
+          accountType: "STUDENT"
+        }
+      })
+      const userInfo = userReg(usersCount, "STUDENT")
+      const newStudent = await ctx.db.students.create({
+        data: {
+          ...input,
+          registrationNumber: userInfo.accountId,
+          admissionNumber: userInfo.admissionNumber,
+        },
+      })
+      const password = await hash(userInfo.admissionNumber, 10)
+      await ctx.db.user.create({
+        data: {
+          accountId: userInfo.accountId,
+          username: userInfo.username,
+          email: userInfo.email.toLowerCase(),
+          password,
+          accountType: "STUDENT",
+        },
+      })
 
-        // Transaction for generating numbers safely
-        const [newRegNumber, newAdmissionNumber] = await ctx.db.$transaction([
-          ctx.db.students.findFirst({
-            where: { registrationNumber: { startsWith: `MSNS${currentYear}` } },
-            orderBy: { registrationNumber: "desc" },
-            select: { registrationNumber: true },
-          }),
-          ctx.db.students.findFirst({
-            where: { admissionNumber: { startsWith: `S${currentYear}` } },
-            orderBy: { admissionNumber: "desc" },
-            select: { admissionNumber: true },
-          }),
-        ]);
-
-        const regNumberSequence = newRegNumber
-          ? parseInt(newRegNumber.registrationNumber.slice(-4)) + 1
-          : 1;
-        const admissionNumberSequence = newAdmissionNumber
-          ? parseInt(newAdmissionNumber.admissionNumber.slice(-3)) + 1
-          : 1;
-
-        const createdStudent = await ctx.db.students.create({
-          data: {
-            ...input,
-            registrationNumber: `MSNS${currentYear}${regNumberSequence
-              .toString()
-              .padStart(4, "0")}`,
-            admissionNumber: `S${currentYear}${admissionNumberSequence
-              .toString()
-              .padStart(3, "0")}`,
-            dateOfBirth: input.dateOfBirth,
-            updatedAt: new Date(),
-            createdAt: new Date(),
-          },
-          select: {
-            studentId: true,
-            registrationNumber: true,
-            admissionNumber: true,
-            studentName: true,
-            createdAt: true,
-            updatedAt: true,
-            studentMobile: true,
-            fatherMobile: true,
-            fatherName: true,
-            studentCNIC: true,
-            fatherCNIC: true,
-            fatherProfession: true,
-          },
-        });
-
-        return createdStudent;
-      } catch (error) {
+      return newStudent;
+    } catch (error) {
         console.error("Error creating student:", error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

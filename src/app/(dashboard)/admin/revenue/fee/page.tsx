@@ -13,7 +13,7 @@ export default async function FeeDetails(){
     <main className="min-h-screen bg-yellow-100/50 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
       <PageHeader breadcrumbs={breadcrumbs} />
       <div className="pt-20 ">
-      <FeeTable />
+        <FeeTable />
       <Separator className="bg-green-900" />
       <FeeAssignmentTable />
       </div>

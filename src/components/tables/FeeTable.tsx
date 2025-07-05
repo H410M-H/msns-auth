@@ -47,7 +47,7 @@ type FeeProps = {
   computerLabFund: number | null;
   studentIdCardFee: number;
   infoAndCallsFee: number;
-  createdAt: Date;
+  createdAt: Date | string;
   type: string;
 };
 
@@ -177,11 +177,15 @@ const columns: ColumnDef<FeeProps>[] = [
   {
     accessorKey: "createdAt",
     header: "Created At",
-    cell: ({ getValue }) => (
-      <span className="text-sm text-gray-500">
-        {format(getValue() as Date, "dd MMM yyyy HH:mm")}
-      </span>
-    ),
+    cell: ({ getValue }) => {
+      const rawValue = getValue();
+      const date = rawValue instanceof Date ? rawValue : new Date(rawValue);
+      return (
+        <span className="text-sm text-gray-500">
+          {format(date, "dd MMM yyyy HH:mm")}
+        </span>
+      );
+    },
   },
 ];
 
@@ -243,28 +247,32 @@ export function FeeTable() {
   return (
     <div className="space-y-4 bg-gradient-to-br from-blue-50/50 to-purple-50/50 p-6">
       <div className="relative space-y-6 rounded-2xl bg-white/80 backdrop-blur-lg p-6 shadow-xl ring-1 ring-gray-100/10">
-        {/* Header Section */}
+        {/* Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-1">
             <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Fee Management
             </h1>
-            <p className="text-sm text-gray-600">Manage fee structures and financial analytics</p>
+            <p className="text-sm text-gray-600">
+              Manage fee structures and financial analytics
+            </p>
           </div>
-          
           <div className="flex flex-col sm:flex-row gap-3 items-center">
             <div className="relative flex-1 w-full sm:w-auto">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search fees..."
                 value={globalFilter ?? ""}
-                onChange={(e) => setGlobalFilter(String(e.target.value))}
+                onChange={(e) => setGlobalFilter(e.target.value)}
                 className="pl-8 bg-white/95 w-full sm:w-64 focus:ring-2 focus:ring-purple-500 rounded-xl shadow-sm"
               />
             </div>
             <div className="flex items-center gap-2">
               <FeeCreationDialog>
-                <Button size="sm" className="gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl">
+                <Button
+                  size="sm"
+                  className="gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl"
+                >
                   <Plus className="h-4 w-4" />
                   <span className="hidden sm:inline">Create</span>
                 </Button>
@@ -288,8 +296,7 @@ export function FeeTable() {
             <FeeAssignmentDialog />
           </div>
         </div>
-
-        {/* Summary Cards */}
+        {/* Summary cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
           {Object.entries(totalFeesByClass).map(([level, totalFee]) => (
             <div
@@ -312,8 +319,7 @@ export function FeeTable() {
             </div>
           ))}
         </div>
-
-        {/* Table Section */}
+        {/* Table */}
         <div className="rounded-xl border border-gray-100 bg-white/95 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <Table className="min-w-[1000px]">
@@ -321,17 +327,18 @@ export function FeeTable() {
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="hover:bg-gray-50/50">
                     {headerGroup.headers.map((header) => (
-                      <TableHead 
-                        key={header.id} 
+                      <TableHead
+                        key={header.id}
                         className="px-6 py-4 font-semibold text-gray-700 hover:bg-gray-100/50 transition-colors"
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         <div className="flex items-center gap-2">
                           {flexRender(header.column.columnDef.header, header.getContext())}
-                          {{
-                            asc: ' 🔼',
-                            desc: ' 🔽',
-                          }[header.column.getIsSorted() as string] ?? null}
+                          {header.column.getIsSorted() === "asc"
+                            ? " 🔼"
+                            : header.column.getIsSorted() === "desc"
+                            ? " 🔽"
+                            : null}
                         </div>
                       </TableHead>
                     ))}
@@ -340,28 +347,29 @@ export function FeeTable() {
               </TableHeader>
               <TableBody>
                 {isLoading ? (
-                  Array(5).fill(0).map((_, i) => (
-                    <TableRow key={i} className="even:bg-gray-50/30">
-                      {columns.map((_, j) => (
-                        <TableCell key={j} className="px-6 py-4">
-                          <Skeleton className="h-4 w-full rounded-lg animate-pulse" />
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
+                  Array(5)
+                    .fill(0)
+                    .map((_, i) => (
+                      <TableRow key={i} className="even:bg-gray-50/30">
+                        {columns.map((_, j) => (
+                          <TableCell key={j} className="px-6 py-4">
+                            <Skeleton className="h-4 w-full rounded-lg animate-pulse" />
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
                 ) : table.getRowModel().rows?.length ? (
                   table.getRowModel().rows.map((row) => (
-                    <TableRow 
-                      key={row.id} 
+                    <TableRow
+                      key={row.id}
                       className="border-t border-gray-100 hover:bg-purple-50/30 transition-colors even:bg-gray-50/30 group"
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell 
-                          key={cell.id} 
+                        <TableCell
+                          key={cell.id}
                           className={cn(
                             "px-6 py-4 text-sm",
-                            cell.column.id === 'totalFee' ? 'font-bold text-green-700' : 'text-gray-600',
-                            cell.column.id === 'discount' ? 'text-red-600' : 'text-gray-600'
+                            cell.column.id === "totalFee" ? "font-bold text-green-700" : "text-gray-600"
                           )}
                         >
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -384,13 +392,11 @@ export function FeeTable() {
             </Table>
           </div>
         </div>
-
         {/* Pagination */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-sm text-gray-600">
             Showing {table.getRowModel().rows.length} of {fees?.length} entries
           </div>
-          
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 text-sm text-gray-600">
               Rows per page:
@@ -410,7 +416,6 @@ export function FeeTable() {
                 </SelectContent>
               </Select>
             </div>
-            
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"

@@ -144,7 +144,7 @@ export function FeeAssignmentDialog() {
                               key={session.sessionId}
                               value={session.sessionId}
                             >
-                              {session.sessionName} ({session.sessionFrom} - {session.sessionTo})
+                              {session.sessionName} ({session.sessionFrom.toLocaleDateString()} - {session.sessionTo.toLocaleDateString()})
                             </SelectItem>
                           ))}
                         </SelectContent>

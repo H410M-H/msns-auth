@@ -20,7 +20,7 @@ interface PageHeaderProps {
 export function PageHeader({ breadcrumbs }: PageHeaderProps) {
   return (
       <div className="flex items-center">
-            <header className="sticky z-30 flex h-12 md:h-16 w-full items-center bg-gradient-to-r from-emerald-200 via-emerald-400 to-green-700 px-4 md:px-6 shadow-md rounded-lg">
+            <header className="sticky z-30 flex h-12 pt-6md:h-16 w-full items-center bg-gradient-to-r from-emerald-200 via-emerald-400 to-green-700 px-4 md:px-6 shadow-md rounded-lg">
 
         <SidebarTrigger className="md:mr-4 shrink-0" />
         

@@ -13,7 +13,7 @@ export default async function DashboardLayout({
 }) {
   return (
         <SidebarProvider>
-          <div className="sticky w-full z-20 min-h-screen flex-col">
+          <div className="sticky w-full z-30 flex-col">
             <Header />
             
             <div className="flex">

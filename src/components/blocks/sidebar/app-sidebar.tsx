@@ -167,10 +167,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader className="relative my-2 h-16 w-full">
+      <SidebarHeader className="relative my-2 mt-16 h-16 w-full">
         <Image
           className="object-contain"
-          src="/logo/logo_1.png"
+            src="https://res.cloudinary.com/dvvbxrs55/image/upload/v1729267533/Official_LOGO_grn_ic9ldd.png"
           alt="logo"
           fill
           sizes="100%"

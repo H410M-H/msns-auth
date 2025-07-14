@@ -18,7 +18,6 @@ import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
 import { RedirectMap } from "~/constants";
 
 const formSchema = z.object({
@@ -63,22 +62,6 @@ export const LoginForm = () => {
       <div className="relative px-6 pb-8 pt-10 sm:px-10">
         <div className="absolute left-0 top-0 h-2 w-full bg-primary" />
 
-        <div className="mb-8 text-center">
-          <div className="relative mx-auto mb-5 h-16 w-32">
-            <Image
-              src="/logo/logo_1.png"
-              alt="Kolibri Logo"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              fill
-              priority
-            />
-          </div>
-
-          <h2 className="font-heading text-2xl font-bold text-primary sm:text-3xl">
-            Art <span className="text-foreground">stay</span>
-          </h2>
-        </div>
-
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -103,7 +86,7 @@ export const LoginForm = () => {
                     <Mail className="h-4 w-4" /> Email
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="you@example.com" {...field} value={field.value ?? ''} />
+                    <Input placeholder="you@msns.edu.pk" {...field} value={field.value ?? ''} />
                   </FormControl>
                   <FormMessage className="text-sm font-medium text-red-500" />
                 </FormItem>

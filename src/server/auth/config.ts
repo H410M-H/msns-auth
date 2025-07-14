@@ -52,9 +52,9 @@ export const authConfig = {
                     const isValidPassword = await compare(password, account.password);
                     if (!isValidPassword) throw new Error("Invalid password");
 
-                    return {
+                    return {    
                         id:account.id,
-                        email: account.email as string,
+                        email: account.email,
                         username: account.username,
                         accountId: account.accountId,
                         accountType: account.accountType,

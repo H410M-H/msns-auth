@@ -39,8 +39,8 @@ export const NavUser = () => {
               size="lg"
               className="group data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <User className="h-6 w-6 rounded-lg" />
-              <p className="line-clamp-1 text-xs text-muted-foreground">
+              <User className="h-8 w-8 rounded-lg" />
+              <p className="line-clamp-1 text-xs text-foreground">
                 {session.data?.user.email}
               </p>
               <ChevronsUpDown className="ml-auto size-4 opacity-70" />
@@ -65,7 +65,7 @@ export const NavUser = () => {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/setting">
+                <Link href="/dashboard/settings">
                   <Settings className="mr-2 size-4" />
                   <span>Settings</span>
                 </Link>

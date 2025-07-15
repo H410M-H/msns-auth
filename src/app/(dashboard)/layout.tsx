@@ -5,7 +5,6 @@ import { Toaster } from "~/components/ui/sonner"
 import { Footer } from "~/components/blocks/footer/footer"
 import { AppSidebar } from "~/components/blocks/sidebar/app-sidebar"
 
-// root layout adjustments
 export default async function DashboardLayout({
   children,
 }: {

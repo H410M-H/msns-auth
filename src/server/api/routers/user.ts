@@ -51,7 +51,7 @@ export const UserRouter = createTRPCRouter({
         }
       })
       const password = await hash(input.password,10)
-      const account = await ctx.db.user.create({
+      return await ctx.db.user.create({
         data: {
           accountId:`msn-${input.accountType[0]}-${currentYear}-${usersCount + 1}`,
           username :`msn-${input.accountType}-${currentYear}-${usersCount + 1}`,

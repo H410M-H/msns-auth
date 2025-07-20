@@ -18,7 +18,6 @@ import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
 import { RedirectMap } from "~/constants";
 
 const formSchema = z.object({
@@ -58,26 +57,7 @@ export const LoginForm = () => {
   };
 
   return (
-    <div className="relative mx-auto w-full max-w-md">
-    <div className="overflow-hidden rounded-2xl bg-white/90 shadow-xl backdrop-blur-md transition-all duration-300 hover:shadow-blue-100/50 dark:bg-slate-900/90 dark:hover:shadow-blue-900/20">
-      <div className="relative px-6 pb-8 pt-10 sm:px-10">
-        <div className="absolute left-0 top-0 h-2 w-full bg-primary" />
 
-        <div className="mb-8 text-center">
-          <div className="relative mx-auto mb-5 h-16 w-32">
-            <Image
-              src="/logo/logo_1.png"
-              alt="Kolibri Logo"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              fill
-              priority
-            />
-          </div>
-
-          <h2 className="font-heading text-2xl font-bold text-primary sm:text-3xl">
-            Art <span className="text-foreground">stay</span>
-          </h2>
-        </div>
 
         <Form {...form}>
           <form
@@ -174,42 +154,6 @@ export const LoginForm = () => {
             </Button>
           </form>
         </Form>
-
-        <div className="mt-8">
-          <p className="text-center text-xs text-gray-500 dark:text-gray-400">
-            By logging in, you agree to Kolibri&apos;s
-            <a
-              href="/terms"
-              className="mx-1 text-blue-600 hover:underline dark:text-blue-400"
-            >
-              Terms of Service
-            </a>
-            and
-            <a
-              href="/privacy"
-              className="ml-1 text-blue-600 hover:underline dark:text-blue-400"
-            >
-              Privacy Policy
-            </a>
-          </p>
-        </div>
-      </div>
-
-      {/* Bottom decorative wave */}
-      <div className="h-12 w-full bg-primary/10 dark:bg-primary/5">
-        <svg
-          className="h-full w-full"
-          viewBox="0 0 1200 120"
-          preserveAspectRatio="none"
-        >
-          <path
-            d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"
-            className="fill-white/90 dark:fill-slate-900/90"
-          ></path>
-        </svg>
-      </div>
-    </div>
-  </div>
 
   );
 };

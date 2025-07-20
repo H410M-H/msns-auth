@@ -54,7 +54,7 @@ export const authConfig = {
 
                     return {
                         id:account.id,
-                        email: account.email as string,
+                        email: account.email,
                         username: account.username,
                         accountId: account.accountId,
                         accountType: account.accountType,

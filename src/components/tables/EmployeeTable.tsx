@@ -29,28 +29,34 @@ import { EmployeeDeletionDialog } from "../forms/employee/EmployeeDeletion"
 import { CSVUploadDialog } from "../forms/student/FileInput"
 import { DotSquareIcon, RefreshCcw } from "lucide-react"
 
-type EmployeeProps = {
+// Use the exact type structure from your Prisma schema
+type EmployeeFromDB = {
   employeeId: string
   registrationNumber: string
-  admissionNumber: string;
   employeeName: string
   fatherName: string
+  admissionNumber: string
   gender: "MALE" | "FEMALE" | "CUSTOM"
   dob: string
-  designation: "Principal" | "Admin" | "Head" | "Clerk" | "Teacher" | "Worker"
+  cnic: string
+  maritalStatus: "Married" | "Unmarried" | "Widow" | "Divorced"
+  doj: string
+  designation: "PRINCIPAL" | "ADMIN" | "HEAD" | "CLERK" | "TEACHER" | "WORKER" | "NONE" | "ALL" | "STUDENT" | "FACULTY"
+  residentialAddress: string
   mobileNo: string
+  additionalContact?: string | null
   education: string
+  isAssign: boolean
+  profilePic?: string | null
+  cv?: string | null
 }
 
-const columns: ColumnDef<EmployeeProps>[] = [
+const columns = [
   {
     id: "select",
     header: ({ table }) => (
       <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
+        checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
       />
@@ -66,56 +72,102 @@ const columns: ColumnDef<EmployeeProps>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "registrationNumber",
+    id: "registrationNumber",
+    accessorFn: (row: EmployeeFromDB) => row.registrationNumber,
     header: "Reg #",
-    cell: ({ row }) => <div className="font-medium">{row.getValue("registrationNumber")}</div>,
+    cell: ({ getValue }) => <div className="font-medium">{getValue() as string}</div>,
   },
   {
-    accessorKey: "employeeName",
+    id: "employeeName",
+    accessorFn: (row: EmployeeFromDB) => row.employeeName,
     header: "Name",
-    cell: ({ row }) => <div className="font-bold">{row.getValue("employeeName")}</div>,
+    cell: ({ getValue }) => <div className="font-bold">{getValue() as string}</div>,
   },
   {
-    accessorKey: "fatherName",
+    id: "fatherName",
+    accessorFn: (row: EmployeeFromDB) => row.fatherName,
     header: "Father Name",
-    cell: ({ row }) => <span>{row.getValue("fatherName")}</span>,
+    cell: ({ getValue }) => <span>{getValue() as string}</span>,
   },
   {
-    accessorKey: "gender",
+    id: "gender",
+    accessorFn: (row: EmployeeFromDB) => row.gender,
     header: "Gender",
-    cell: ({ row }) => <span>{row.getValue("gender")}</span>,
+    cell: ({ getValue }) => <span>{getValue() as string}</span>,
   },
   {
-    accessorKey: "dob",
+    id: "dob",
+    accessorFn: (row: EmployeeFromDB) => row.dob,
     header: "Date of Birth",
-    cell: ({ row }) => {
-      const date = new Date(row.getValue("dob"))
+    cell: ({ getValue }) => {
+      const dateStr = getValue() as string
+      if (dateStr === "none") return <span>Not provided</span>
+      const date = new Date(dateStr)
       return <span>{date.toLocaleDateString()}</span>
     },
   },
   {
-    accessorKey: "designation",
+    id: "designation",
+    accessorFn: (row: EmployeeFromDB) => row.designation,
     header: "Designation",
-    cell: ({ row }) => <span>{row.getValue("designation")}</span>,
+    cell: ({ getValue }) => (
+      <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">{getValue() as string}</span>
+    ),
   },
   {
-    accessorKey: "mobileNo",
+    id: "mobileNo",
+    accessorFn: (row: EmployeeFromDB) => row.mobileNo,
     header: "Mobile",
-    cell: ({ row }) => <span>{row.getValue("mobileNo")}</span>,
+    cell: ({ getValue }) => {
+      const mobile = getValue() as string
+      return <span>{mobile === "none" ? "Not provided" : mobile}</span>
+    },
   },
   {
-    accessorKey: "doj",
+    id: "doj",
+    accessorFn: (row: EmployeeFromDB) => row.doj,
     header: "Date of Joining",
-    cell: ({ row }) => {
-      const date = new Date(row.getValue("doj"))
+    cell: ({ getValue }) => {
+      const dateStr = getValue() as string
+      if (dateStr === "none") return <span>Not provided</span>
+      const date = new Date(dateStr)
       return <span>{date.toLocaleDateString()}</span>
     },
+  },
+  {
+    id: "education",
+    accessorFn: (row: EmployeeFromDB) => row.education,
+    header: "Education",
+    cell: ({ getValue }) => {
+      const education = getValue() as string
+      return <span>{education === "none" ? "Not provided" : education}</span>
+    },
+  },
+  {
+    id: "maritalStatus",
+    accessorFn: (row: EmployeeFromDB) => row.maritalStatus,
+    header: "Marital Status",
+    cell: ({ getValue }) => <span>{getValue() as string}</span>,
+  },
+  {
+    id: "isAssign",
+    accessorFn: (row: EmployeeFromDB) => row.isAssign,
+    header: "Assignment Status",
+    cell: ({ getValue }) => (
+      <span
+        className={`px-2 py-1 rounded-full text-xs ${
+          getValue() ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+        }`}
+      >
+        {getValue() ? "Assigned" : "Unassigned"}
+      </span>
+    ),
   },
   {
     id: "actions",
     header: "Actions",
     enableHiding: false,
-    cell: ({ row }) => (
+    cell: ({ row }: { row: { original: EmployeeFromDB } }) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="w-8 h-8 p-0">
@@ -126,22 +178,30 @@ const columns: ColumnDef<EmployeeProps>[] = [
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
-            <Link href={`/dashboard/student/edit/${row.original.employeeId}`}>
-              Edit
-            </Link>
+            <Link href={`/dashboard/employee/edit/${row.original.employeeId}`}>Edit</Link>
           </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href={`/dashboard/employee/view/${row.original.employeeId}`}>View Details</Link>
+          </DropdownMenuItem>
+          {row.original.cv && (
+            <DropdownMenuItem asChild>
+              <Link href={row.original.cv} target="_blank">
+                View CV
+              </Link>
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     ),
   },
-];
+] satisfies ColumnDef<EmployeeFromDB, unknown>[]
 
 export function EmployeeTable() {
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [rowSelection, setRowSelection] = useState({});
-  const { data: employees, refetch } = api.employee.getEmployees.useQuery();
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [rowSelection, setRowSelection] = useState({})
+  const { data: employees, refetch } = api.employee.getEmployees.useQuery()
 
-  const table = useReactTable({
+  const table = useReactTable<EmployeeFromDB>({
     data: employees ?? [],
     columns,
     onSortingChange: setSorting,
@@ -151,26 +211,27 @@ export function EmployeeTable() {
     getFilteredRowModel: getFilteredRowModel(),
     onRowSelectionChange: setRowSelection,
     state: { sorting, rowSelection },
-  });
+  })
 
   return (
     <div className="w-full">
       <div className="flex items-center justify-between p-4">
-        <Input
-          placeholder="Search name"
-          value={(table.getColumn("employeeName")?.getFilterValue() as string) ?? ""}
-          onChange={(e) =>
-            table.getColumn("employeeName")?.setFilterValue(e.target.value)
-          }
-          className="max-w-sm"
-        />
         <div className="flex items-center gap-2">
-        <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetch()}
-            className="shrink-0"
-          >
+          <Input
+            placeholder="Search name"
+            value={(table.getColumn("employeeName")?.getFilterValue() as string) ?? ""}
+            onChange={(e) => table.getColumn("employeeName")?.setFilterValue(e.target.value)}
+            className="max-w-sm"
+          />
+          <Input
+            placeholder="Search by designation"
+            value={(table.getColumn("designation")?.getFilterValue() as string) ?? ""}
+            onChange={(e) => table.getColumn("designation")?.setFilterValue(e.target.value)}
+            className="max-w-sm"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => refetch()} className="shrink-0">
             <RefreshCcw className="h-4 w-4" />
           </Button>
           <EmployeeDeletionDialog
@@ -188,16 +249,14 @@ export function EmployeeTable() {
           </Button>
         </div>
       </div>
-      <div className="p-4 border rounded-md">        
-      <Table>
+      <div className="p-4 border rounded-md">
+        <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
+                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
@@ -208,9 +267,7 @@ export function EmployeeTable() {
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
+                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                   ))}
                 </TableRow>
               ))
@@ -226,8 +283,8 @@ export function EmployeeTable() {
       </div>
       <div className="flex items-center justify-between py-4">
         <span className="text-sm">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+          {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s)
+          selected.
         </span>
         <div className="flex gap-2">
           <Button
@@ -238,17 +295,11 @@ export function EmployeeTable() {
           >
             Previous
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
+          <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
             Next
           </Button>
         </div>
       </div>
     </div>
-  );
-};
-
+  )
+}

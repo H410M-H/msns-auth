@@ -78,7 +78,7 @@ export function ClassStudentTable({ classId, sessionId }: ClassStudentTableProps
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const { refetch: refetchClassStudents } = api.alotment.getStudentsByClassAndSession.useQuery(
+  const { refetch: refetchClassStudents } = api.allotment.getStudentsByClassAndSession.useQuery(
     { classId, sessionId },
     {
       refetchOnWindowFocus: false,

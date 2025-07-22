@@ -63,8 +63,8 @@ export const SubjectAssignmentDialog = ({
     data: teachers,
     isLoading: loadingTeachers,
     error: teachersError,
-  } = api.employee.getEmployeesByDesignation.useQuery({ 
-    designation: "Teacher" 
+  } = api.employee.getEmployeesByDesignation.useQuery({
+    designation: "TEACHER"
   });
 
   const {

@@ -67,7 +67,7 @@ const data: NavigationConfig = {
   HEAD: [
     {
       title: "Overview",
-      url: "/safari",
+      url: "/clerk",
       icon: Home,
     },
     {
@@ -105,7 +105,7 @@ const data: NavigationConfig = {
   PRINCIPAL: [
     {
       title: "Overview",
-      url: "/principal",
+      url: "/clerk",
       icon: Home,
     },
     {

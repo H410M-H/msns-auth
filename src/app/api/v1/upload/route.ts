@@ -1,7 +1,6 @@
-// app/api/upload/route.ts
-import { type NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { Storage } from "@google-cloud/storage";
-import multer from "multer";
 import { Readable } from 'stream';
 import { env } from '~/env';
 
@@ -11,19 +10,12 @@ const storage = new Storage({
 
 const bucket = storage.bucket(env.GCP_BUCKET_NAME);
 
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
-  },
-});
-
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
-    const file = formData.get('file') as File;
+    const file = formData.get('file');
 
-    if (!file) {
+    if (!file || !(file instanceof File)) {
       return NextResponse.json(
         { error: "No file uploaded" },
         { status: 400 }

@@ -18,7 +18,7 @@ model User {
 
   Event Event[] @relation("EventCreator")
 
-  EventAttendee EventAttendee[]
+  EventAttendee Attendee[]
 }
 
 model ClassSubject {
@@ -133,103 +133,66 @@ model Sessions {
 }
 
 model Event {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  
-  // Date and time
-  date        DateTime
-  startTime   String   // Format: "HH:MM"
-  endTime     String   // Format: "HH:MM"
-  timezone    String   @default("UTC")
-  
-  // Location
-  location    String?
-  isOnline    Boolean  @default(false)
-  
-  // Event details
-  type        EventType
-  priority    Priority  @default(MEDIUM)
-  status      EventStatus @default(CONFIRMED)
-  
-  // Recurrence
-  recurring   RecurrenceType @default(NONE)
-  recurrenceEnd DateTime?
-  
-  // Metadata
-  maxAttendees Int?
-  isPublic     Boolean @default(false)
-  notes        String?
-  
-  // Relations
-  creatorId    String
-  creator      User @relation("EventCreator", fields: [creatorId], references: [id], onDelete: Cascade)
-  
-  attendees    EventAttendee[]
-  reminders    EventReminder[]
-  tags         EventTag[]
-  
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id             String     @id @default(cuid())
+  title          String
+  description    String?
+  startDateTime  DateTime
+  endDateTime    DateTime
+  timezone       String    @default("UTC")
+  location       String?
+  isOnline       Boolean   @default(false)
+  type           EventType
+  priority       Priority
+  status         EventStatus
+  recurring      RecurrenceType
+  recurrenceEnd  DateTime?
+  maxAttendees   Int?
+  isPublic       Boolean   @default(false)
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
-  @@map("events")
-}
+  tags      EventTag[]
+  attendees Attendee[]
+  reminders Reminder[]
 
-model EventAttendee {
-  id       String @id @default(cuid())
-  eventId  String
-  userId   String
-  status   AttendeeStatus @default(PENDING)
-  
-  event    Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user     User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([eventId, userId])
-  @@map("event_attendees")
-}
-
-model EventReminder {
-  id        String   @id @default(cuid())
-  eventId   String
-  type      ReminderType
-  value     Int      // Minutes before event
-  sent      Boolean  @default(false)
-  
-  event     Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("event_reminders")
+  User User[] @relation("EventCreator")
 }
 
 model Tag {
-  id        String @id @default(cuid())
-  name      String @unique
-  color     String @default("#6B7280") // Hex color code
-  
-  eventTags EventTag[]
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("tags")
+  id     String @id @default(cuid())
+  name   String
+  color  String
+  events EventTag[]
 }
 
 model EventTag {
-  id      String @id @default(cuid())
   eventId String
   tagId   String
-  
-  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  tag     Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  event   Event @relation(fields: [eventId], references: [id])
+  tag     Tag   @relation(fields: [tagId], references: [id])
 
-  @@unique([eventId, tagId])
-  @@map("event_tags")
+  @@id([eventId, tagId])
 }
+
+model Attendee {
+  eventId  String
+  userId   String
+  status   AttendeeStatus
+  event    Event @relation(fields: [eventId], references: [id])
+  user     User  @relation(fields: [userId], references: [id])
+
+  @@id([eventId, userId])
+}
+
+model Reminder {
+  id           String   @id @default(cuid())
+  minutesBefore Int
+  type         ReminderType
+  eventId      String
+  event        Event    @relation(fields: [eventId], references: [id])
+}
+
 
 model StudentClass {
   scId            String            @id @default(cuid())

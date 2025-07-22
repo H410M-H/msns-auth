@@ -1,178 +1,144 @@
 "use client"
 
-import { useState } from "react";
-import { ReloadIcon } from "@radix-ui/react-icons";
-import { useForm } from "react-hook-form";
-import { Button } from "~/components/ui/button";
-import { api } from "~/trpc/react";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "~/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+import { Button } from "~/components/ui/button"
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "~/components/ui/dialog"
+import { useForm } from "react-hook-form"
+import { api } from "~/trpc/react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
+import { Label } from "~/components/ui/label"
+import { z } from "zod"
+import { toast } from "~/hooks/use-toast"
 
-type AllotmentDialogProps = {
-  classId: string;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-};
+// Use the exact schema from your AllotmentRouter
+const AllotmentSchema = z.object({
+  classId: z.string().cuid(),
+  studentId: z.string().cuid(),
+  sessionId: z.string().cuid(),
+})
 
-const formSchema = z.object({
-  studentId: z.string({ required_error: "Student is required" }),
-  sessionId: z.string({ required_error: "Session is required" }),
-});
+type AllotmentSchemaType = z.infer<typeof AllotmentSchema>
 
-export const AllotmentDialog = ({ 
-  classId,
-  open,
-  onOpenChange
-}: AllotmentDialogProps) => {  const [searchTerm, setSearchTerm] = useState("");
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-  });
+interface AllotmentDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  sessions: { sessionId: string; sessionName: string }[]
+  students: { studentId: string; studentName: string }[]
+  classId: string
+}
 
-  const utils = api.useUtils();
-  const { data: sessions } = api.session.getSessions.useQuery();
-  const { data: students } = api.student.getUnAllocateStudents.useQuery({
-    searchTerm,
-  });
-
-  const allotment = api.alotment.addToClass.useMutation({
-    onSuccess: async () => {
-      form.reset();
-      await utils.student.getUnAllocateStudents.invalidate();
-      onOpenChange(false); // Add this line
-    },
-  });
-
-  const handleSubmit = (values: z.infer<typeof formSchema>) => {
-    allotment.mutate({
+export default function AllotmentDialog({ open, onOpenChange, sessions, students, classId }: AllotmentDialogProps) {
+  const form = useForm<AllotmentSchemaType>({
+    resolver: zodResolver(AllotmentSchema),
+    defaultValues: {
+      sessionId: "",
+      studentId: "",
       classId,
-      sessionId: values.sessionId,
-      studentId: values.studentId,
-    });
-  };
+    },
+  })
+
+  const utils = api.useUtils()
+
+  const allotment = api.allotment.addToClass.useMutation({
+    onSuccess: async () => {
+      toast({
+        title: "Success",
+        description: "Student has been successfully allotted to the class.",
+      })
+      form.reset()
+      await utils.student.getUnAllocateStudents.invalidate()
+      await utils.allotment.invalidate()
+      onOpenChange(false)
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to allot student to class.",
+        variant: "destructive",
+      })
+    },
+  })
+
+  const onSubmit = (data: AllotmentSchemaType) => {
+    allotment.mutate({
+      ...data,
+      classId,
+    })
+  }
 
   return (
-<Dialog open={open} onOpenChange={onOpenChange}>      <DialogTrigger asChild>
-        <Button>Add Student to Class</Button>
-      </DialogTrigger>
-      <DialogContent className="w-full sm:max-w-md">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Allot Student to Class</DialogTitle>
         </DialogHeader>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4"
-          >
-            <FormField
-              control={form.control}
-              name="studentId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Select Student</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    disabled={allotment.isPending}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select student" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <Input
-                        placeholder="Search students..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="mb-2"
-                      />
-                      {students?.data.map((student) => (
-                        <SelectItem
-                          key={student.studentId}
-                          value={student.studentId}
-                        >
-                          {student.studentName} ({student.fatherName})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4 py-2">
+          <div className="space-y-2">
+            <Label htmlFor="session-select">Session</Label>
+            <Select onValueChange={(value) => form.setValue("sessionId", value)} value={form.watch("sessionId")}>
+              <SelectTrigger id="session-select">
+                <SelectValue placeholder="Select session" />
+              </SelectTrigger>
+              <SelectContent>
+                {sessions.length > 0 ? (
+                  sessions.map((session) => (
+                    <SelectItem key={session.sessionId} value={session.sessionId}>
+                      {session.sessionName}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="" disabled>
+                    No sessions available
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+            {form.formState.errors.sessionId && (
+              <p className="text-sm text-red-500">{form.formState.errors.sessionId.message}</p>
+            )}
+          </div>
 
-            <FormField
-              control={form.control}
-              name="sessionId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Select Session</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    disabled={allotment.isPending}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select session" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {sessions?.map((session) => (
-                        <SelectItem
-                          key={session.sessionId}
-                          value={session.sessionId}
-                        >
-                          {session.sessionName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <div className="space-y-2">
+            <Label htmlFor="student-select">Student</Label>
+            <Select onValueChange={(value) => form.setValue("studentId", value)} value={form.watch("studentId")}>
+              <SelectTrigger id="student-select">
+                <SelectValue placeholder="Select student" />
+              </SelectTrigger>
+              <SelectContent>
+                {students.length > 0 ? (
+                  students.map((student) => (
+                    <SelectItem key={student.studentId} value={student.studentId}>
+                      {student.studentName}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="" disabled>
+                    No students available
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+            {form.formState.errors.studentId && (
+              <p className="text-sm text-red-500">{form.formState.errors.studentId.message}</p>
+            )}
+          </div>
 
+          <DialogFooter className="mt-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={allotment.isPending}>
+              Cancel
+            </Button>
             <Button
               type="submit"
-              disabled={allotment.isPending}
-              className="w-full"
+              disabled={allotment.isPending || !form.watch("sessionId") || !form.watch("studentId")}
             >
-              {allotment.isPending ? (
-                <>
-                  <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                "Allot Student"
-              )}
+              {allotment.isPending ? "Allotting..." : "Allot Student"}
             </Button>
-          </form>
-        </Form>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
+
+// Also export as named export for flexibility
+export { AllotmentDialog }

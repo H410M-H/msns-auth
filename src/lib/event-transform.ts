@@ -8,6 +8,22 @@ export type EventWithRelations = Event & {
   tags: (EventTag & { tag: Tag })[]
 }
 
+// Frontend event data type
+export interface FrontendEventData {
+  title: string
+  description?: string
+  date: string
+  startTime: string
+  endTime: string
+  location?: string
+  type: string
+  priority: string
+  status: string
+  recurring: string
+  notes?: string
+  attendees?: number
+}
+
 // Transform Prisma event to frontend format
 export function transformEventForFrontend(event: EventWithRelations) {
   return {
@@ -22,7 +38,8 @@ export function transformEventForFrontend(event: EventWithRelations) {
     attendees: event.attendees.length,
     priority: event.priority.toLowerCase(),
     recurring: event.recurring.toLowerCase(),
-    organizer: event.creator.name || event.creator.email,
+    // Fix: Use username instead of name, with fallback to email
+    organizer: event.creator.username ?? event.creator.email,
     status: event.status.toLowerCase(),
     reminders: event.reminders.map((r) => `${r.value} minutes before`),
     notes: event.notes,
@@ -35,7 +52,7 @@ export function transformEventForFrontend(event: EventWithRelations) {
 }
 
 // Transform frontend event data to Prisma format
-export function transformEventForDatabase(eventData: unknown) {
+export function transformEventForDatabase(eventData: FrontendEventData) {
   return {
     title: eventData.title,
     description: eventData.description,
@@ -48,7 +65,36 @@ export function transformEventForDatabase(eventData: unknown) {
     status: eventData.status.toUpperCase(),
     recurring: eventData.recurring.toUpperCase(),
     notes: eventData.notes,
-    isOnline: eventData.location?.toLowerCase().includes("online") || false,
+    isOnline: eventData.location?.toLowerCase().includes("online") ?? false,
     maxAttendees: eventData.attendees ? Number(eventData.attendees) : null,
   }
+}
+
+// Type guard to validate frontend event data
+export function isValidFrontendEventData(data: unknown): data is FrontendEventData {
+  if (typeof data !== "object" || data === null) {
+    return false
+  }
+
+  const eventData = data as Record<string, unknown>
+
+  return (
+    typeof eventData.title === "string" &&
+    typeof eventData.date === "string" &&
+    typeof eventData.startTime === "string" &&
+    typeof eventData.endTime === "string" &&
+    typeof eventData.type === "string" &&
+    typeof eventData.priority === "string" &&
+    typeof eventData.status === "string" &&
+    typeof eventData.recurring === "string"
+  )
+}
+
+// Safe transform function with validation
+export function safeTransformEventForDatabase(eventData: unknown) {
+  if (!isValidFrontendEventData(eventData)) {
+    throw new Error("Invalid event data format")
+  }
+
+  return transformEventForDatabase(eventData)
 }

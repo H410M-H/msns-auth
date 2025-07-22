@@ -33,6 +33,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { WalletCards } from "lucide-react";
+import { type Grades, type Sessions, type Students } from "@prisma/client";
 
 const formSchema = z.object({
   sessionId: z.string().min(1, "Session is required"),
@@ -53,14 +54,14 @@ export function FeeAssignmentDialog() {
   const feeData = api.fee.getAllFees.useQuery();
   const sessionData = api.session.getSessions.useQuery();
   const classData = api.class.getClasses.useQuery();
-  const studentData = api.alotment.getStudentsByClassAndSession.useQuery(
+  const studentData = api.allotment.getStudentsByClassAndSession.useQuery(
     {
       classId: form.watch("classId"),
       sessionId: form.watch("sessionId")
     },
     {
       enabled: !!form.watch("classId"),
-      select: (data) => data.data
+      select: (data: { data: ({ sessionId: string; classId: string; studentId: string; scId: string; } & { Grades: Grades; Sessions: Sessions; Students: Students; })[]; }) => data.data
     }
   );
 

@@ -96,7 +96,7 @@ export const SubjectCreationDialog = ({
     isLoading: loadingTeachers,
     error: teachersError,
   } = api.employee.getEmployeesByDesignation.useQuery(
-    { designation: "Teacher" },
+    { designation: "TEACHER" },
     { enabled: open }
   );
 

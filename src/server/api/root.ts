@@ -14,13 +14,14 @@ import { UserRouter } from "./routers/user";
 export const appRouter = createTRPCRouter({
   user: UserRouter,
   upload: uploadRouter,
-  alotment: AllotmentRouter,
+  allotment: AllotmentRouter,
   student: StudentRouter,
   employee: EmployeeRouter,
   report: ReportRouter,
   fee: feeRouter,
   salary: SalaryRouter,
   session: SessionRouter,
+  event: EventRouter,
   subject: SubjectRouter,
   class: ClassRouter,
 });

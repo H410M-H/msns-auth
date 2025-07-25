@@ -9,6 +9,8 @@ export type EventWithRelations = Event & {
 };
 
 export interface FrontendEventData {
+  [x: string]: string;
+  startTime(startTime: any): import("react").ReactNode;
   id: string;
   title: string;
   description?: string;

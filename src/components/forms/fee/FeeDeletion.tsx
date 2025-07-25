@@ -37,7 +37,6 @@ export function FeeDeletionDialog({ feeIds, onDeleteSuccess }: FeeDeletionDialog
       toast({
         title: "Error deleting fees",
         description: error.message,
-        variant: "destructive",
       })
     },
   })

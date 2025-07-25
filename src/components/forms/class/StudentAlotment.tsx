@@ -54,8 +54,7 @@ export default function AllotmentDialog({ open, onOpenChange, sessions, students
       toast({
         title: "Error",
         description: error.message || "Failed to allot student to class.",
-        variant: "destructive",
-      })
+        })
     },
   })
 

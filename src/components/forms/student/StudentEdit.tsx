@@ -57,7 +57,6 @@ export function StudentEditDialog({ student, onClose }: StudentEditFormProps) {
             toast({
                 title: "Error",
                 description: error.message,
-                variant: "destructive",
             });
         },
     });

@@ -78,7 +78,6 @@ export function FeeAssignmentDialog() {
       toast({
         title: "Error assigning fee",
         description: error.message,
-        variant: "destructive",
       });
     },
   });

@@ -10,6 +10,7 @@ import { feeRouter } from "./routers/fee";
 import { uploadRouter } from "./routers/upload";
 import { AllotmentRouter } from "./routers/allotment";
 import { UserRouter } from "./routers/user";
+import { EventRouter } from "./routers/event";
 
 export const appRouter = createTRPCRouter({
   user: UserRouter,

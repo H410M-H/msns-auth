@@ -65,7 +65,6 @@ export default function EmployeeCreationDialog() {
       toast({
         title: "Error",
         description: errorMessage,
-        variant: "destructive",
       });
     },
   });
@@ -104,7 +103,6 @@ export default function EmployeeCreationDialog() {
       toast({
         title: "Upload Error",
         description: errorMessage,
-        variant: "destructive",
       });
     } finally {
       setIsUploading(false);
@@ -134,7 +132,6 @@ export default function EmployeeCreationDialog() {
       toast({
         title: "Upload Error",
         description: errorMessage,
-        variant: "destructive",
       });
     }
   };

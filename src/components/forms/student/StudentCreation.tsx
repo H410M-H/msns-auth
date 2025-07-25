@@ -59,7 +59,6 @@ export default function StudentCreationDialog() {
       toast({
         title: "Error",
         description: errorMessage,
-        variant: "destructive",
       });
     },
   });
@@ -89,7 +88,6 @@ export default function StudentCreationDialog() {
       toast({
         title: "Upload Error",
         description: errorMessage,
-        variant: "destructive",
       });
     }
   };

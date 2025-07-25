@@ -67,7 +67,6 @@ export function FeeCreationDialog({}: FeeCreationDialogProps) {
       toast({
         title: "Error creating fee structure",
         description: error.message,
-        variant: "destructive",
       });
     },
   });

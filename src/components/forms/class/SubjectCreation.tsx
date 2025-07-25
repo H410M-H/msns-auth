@@ -114,7 +114,6 @@ export const SubjectCreationDialog = ({
       toast({
         title: "Session Error",
         description: sessionsError.message,
-        variant: "destructive",
       });
     }
   }, [sessionsError]);
@@ -172,7 +171,6 @@ export const SubjectCreationDialog = ({
       toast({
         title: "Operation Failed",
         description: errorMessage,
-        variant: "destructive",
       });
     }
   };

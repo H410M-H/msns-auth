@@ -55,7 +55,6 @@ export default function FeeAllotmentDialog({
       toast({
         title: "Error updating fee assignment",
         description: error.message,
-        variant: "destructive",
       })
     },
   })
@@ -73,7 +72,6 @@ export default function FeeAllotmentDialog({
       toast({
         title: "Error removing fee assignment",
         description: error.message ?? "Unknown error occurred",
-        variant: "destructive",
       })
     },
   })

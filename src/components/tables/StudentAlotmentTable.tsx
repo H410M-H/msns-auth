@@ -129,7 +129,6 @@ export function StudentAllotmentTable({ classId, sessionId }: StudentAllotmentTa
       toast({
         title: "Error",
         description: error.message ?? "Failed to remove student(s)",
-        variant: "destructive",
       })
     },
   })
@@ -279,7 +278,6 @@ export function StudentAllotmentTable({ classId, sessionId }: StudentAllotmentTa
       toast({
         title: "No Selection",
         description: "Please select students to remove",
-        variant: "destructive",
       })
       return
     }

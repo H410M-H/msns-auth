@@ -4,6 +4,7 @@ import AdminCards from '~/components/cards/AdminCard'
 import { StatsCards } from '~/components/cards/StatCard'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '~/components/ui/dialog'
 import { Button } from '~/components/ui/button' // Changed import source
+import EventsTable from '~/components/tables/EventsTable'
 
 export default async function AdminDashboard() {
   const breadcrumbs = [
@@ -46,6 +47,12 @@ export default async function AdminDashboard() {
             Quick Management
           </h2>
           <AdminCards />
+        </section>
+                <section className="mb-8">
+          <h2 className="text-2xl font-bold text-slate-800 mb-6 pb-2 border-b border-slate-100">
+            Quick Management
+          </h2>
+          <EventsTable />
         </section>
       </div>
     </div>

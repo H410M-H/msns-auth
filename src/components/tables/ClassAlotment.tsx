@@ -133,7 +133,6 @@ export const ClassAllotmentTable = ({ classId, sessionId }: ClassAllotmentTableP
       toast({
         title: "Error",
         description: error.message,
-        variant: "destructive",
       })
     },
   })

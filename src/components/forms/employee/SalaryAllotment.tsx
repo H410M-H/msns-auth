@@ -61,7 +61,6 @@ export function SalaryAssignmentForm() {
       toast({
         title: "Error",
         description: error.message || "An error occurred",
-        variant: "destructive",
       })
     },
     onSettled: () => setIsLoading(false),

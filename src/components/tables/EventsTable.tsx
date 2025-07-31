@@ -31,11 +31,29 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import EventIndicator from "../blocks/academic-calender/event-indicator"
-import { type EventDetails } from "../blocks/academic-calender/event-details-modal"
+import type { CreateEventSchema } from "~/lib/event-schemas"
+import { z } from "zod"
 import dayjs from "dayjs"
 import { api } from "~/trpc/react"
-import { type z } from "zod"
-import { type CreateEventSchema } from "~/lib/event-schemas"
+
+// Define EventDetails to match FrontendEventData from safeTransformEventForFrontend
+interface EventDetails {
+  id: string
+  title: string
+  type: "MEETING" | "WORKSHOP" | "CONFERENCE" | "TRAINING" | "WEBINAR" | "SOCIAL" | "OTHER"
+  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+  status: "CONFIRMED" | "TENTATIVE" | "CANCELLED"
+  startTime?: string
+  endTime?: string
+  date: string
+  description?: string
+  location?: string
+  organizer?: string // name
+  creatorId: string // user ID
+  attendees: { userId: string; status: string }[]
+  tagIds?: string[]
+  reminders: { type: string; value: number }[]
+}
 
 type SortField = "TITLE" | "DATE" | "TYPE" | "PRIORITY" | "STATUS" | "ORGANIZER" | "ATTENDEES"
 type SortDirection = "asc" | "desc"
@@ -103,14 +121,14 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
         case "TYPE":
           return event.type
         case "PRIORITY":
-          const priorityOrder = { low: 1, medium: 2, high: 3, urgent: 4 }
+          const priorityOrder = { LOW: 1, MEDIUM: 2, HIGH: 3, URGENT: 4 }
           return priorityOrder[event.priority] || 0
         case "STATUS":
           return event.status
         case "ORGANIZER":
           return event.organizer?.toLowerCase() ?? ""
         case "ATTENDEES":
-          return event.attendees ?? 0
+          return event.attendees.length
       }
     }
 
@@ -165,13 +183,13 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "urgent":
+      case "URGENT":
         return "bg-red-500/20 text-red-400 border-red-500"
-      case "high":
+      case "HIGH":
         return "bg-orange-500/20 text-orange-400 border-orange-500"
-      case "medium":
+      case "MEDIUM":
         return "bg-yellow-500/20 text-yellow-400 border-yellow-500"
-      case "low":
+      case "LOW":
         return "bg-green-500/20 text-green-400 border-green-500"
       default:
         return "bg-gray-500/20 text-gray-400 border-gray-500"
@@ -180,11 +198,11 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "confirmed":
+      case "CONFIRMED":
         return "bg-green-500/20 text-green-400 border-green-500"
-      case "tentative":
+      case "TENTATIVE":
         return "bg-yellow-500/20 text-yellow-400 border-yellow-500"
-      case "cancelled":
+      case "CANCELLED":
         return "bg-red-500/20 text-red-400 border-red-500"
       default:
         return "bg-gray-500/20 text-gray-400 border-gray-500"
@@ -206,10 +224,10 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
       status: event.status,
       description: event.description,
       location: event.location,
-      creatorId: event.organizer ?? "", // Adjust based on actual creator ID
-      tagIds: [], // Adjust based on actual tags if available
-      reminders: [], // Adjust based on actual reminders if available
-      attendees: [], // Adjust based on actual attendees if available
+      creatorId: event.creatorId,
+      tagIds: event.tagIds ?? [],
+      reminders: event.reminders.map(rem => ({ type: rem.type as "EMAIL" | "PUSH" | "SMS", value: rem.value })),
+      attendees: event.attendees.map(att => ({ userId: att.userId, status: att.status as "PENDING" | "ACCEPTED" | "DECLINED" | "MAYBE" })),
     }
     createEvent.mutate(newEvent)
   }
@@ -274,7 +292,7 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
                   <SelectItem key={type} value={type}>
                     <div className="flex items-center gap-2">
                       <EventIndicator eventType={type} size="sm" />
-                      <span className="capitalize">{type}</span>
+                      <span className="capitalize">{type.toLowerCase()}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -290,7 +308,7 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
                 {priorities.map((priority) => (
                   <SelectItem key={priority} value={priority}>
                     <Badge className={`${getPriorityColor(priority)} border text-xs`}>
-                      {priority.charAt(0).toUpperCase() + priority.slice(1)}
+                      {priority.charAt(0).toUpperCase() + priority.slice(1).toLowerCase()}
                     </Badge>
                   </SelectItem>
                 ))}
@@ -306,7 +324,7 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
                 {statuses.map((status) => (
                   <SelectItem key={status} value={status}>
                     <Badge className={`${getStatusColor(status)} border text-xs`}>
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                      {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
                     </Badge>
                   </SelectItem>
                 ))}
@@ -441,7 +459,7 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
                         </div>
                         <div className="flex items-center gap-1 text-sm text-gray-400">
                           <Clock className="w-3 h-3" />
-                          {formatTime(event.startTime)} - {formatTime(event.endTime)}
+                          {formatTime(event.startTime ?? "00:00")} - {formatTime(event.endTime)}
                         </div>
                       </div>
                     </TableCell>
@@ -463,13 +481,13 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
 
                     <TableCell>
                       <Badge className={`${getPriorityColor(event.priority)} border text-xs`}>
-                        {event.priority.charAt(0).toUpperCase() + event.priority.slice(1)}
+                        {event.priority.charAt(0).toUpperCase() + event.priority.slice(1).toLowerCase()}
                       </Badge>
                     </TableCell>
 
                     <TableCell>
                       <Badge className={`${getStatusColor(event.status)} border text-xs`}>
-                        {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                        {event.status.charAt(0).toUpperCase() + event.status.slice(1).toLowerCase()}
                       </Badge>
                     </TableCell>
 
@@ -478,10 +496,10 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
                     </TableCell>
 
                     <TableCell>
-                      {event.attendees ? (
+                      {event.attendees.length > 0 ? (
                         <div className="flex items-center gap-1 text-sm text-gray-300">
                           <Users className="w-3 h-3" />
-                          {event.attendees}
+                          {event.attendees.length}
                         </div>
                       ) : (
                         <span className="text-gray-500">-</span>
@@ -596,9 +614,9 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
               Showing {filteredAndSortedEvents.length} of {totalEvents} events
             </div>
             <div className="flex items-center gap-4">
-              <div>Confirmed: {filteredAndSortedEvents.filter((e) => e.status === "confirmed").length}</div>
-              <div>Tentative: {filteredAndSortedEvents.filter((e) => e.status === "tentative").length}</div>
-              <div>Cancelled: {filteredAndSortedEvents.filter((e) => e.status === "cancelled").length}</div>
+              <div>Confirmed: {filteredAndSortedEvents.filter((e) => e.status === "CONFIRMED").length}</div>
+              <div>Tentative: {filteredAndSortedEvents.filter((e) => e.status === "TENTATIVE").length}</div>
+              <div>Cancelled: {filteredAndSortedEvents.filter((e) => e.status === "CANCELLED").length}</div>
             </div>
           </div>
         )}

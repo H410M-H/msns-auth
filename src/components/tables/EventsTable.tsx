@@ -32,35 +32,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import EventIndicator from "../blocks/academic-calender/event-indicator"
 import type { CreateEventSchema } from "~/lib/event-schemas"
-import { z } from "zod"
+import { type z } from "zod"
 import dayjs from "dayjs"
 import { api } from "~/trpc/react"
-
-// Define EventDetails to match FrontendEventData from safeTransformEventForFrontend
-interface EventDetails {
-  id: string
-  title: string
-  type: "MEETING" | "WORKSHOP" | "CONFERENCE" | "TRAINING" | "WEBINAR" | "SOCIAL" | "OTHER"
-  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
-  status: "CONFIRMED" | "TENTATIVE" | "CANCELLED"
-  startTime?: string
-  endTime?: string
-  date: string
-  description?: string
-  location?: string
-  organizer?: string // name
-  creatorId: string // user ID
-  attendees: { userId: string; status: string }[]
-  tagIds?: string[]
-  reminders: { type: string; value: number }[]
-}
+import type { FrontendEventData } from "~/lib/event-helpers"
 
 type SortField = "TITLE" | "DATE" | "TYPE" | "PRIORITY" | "STATUS" | "ORGANIZER" | "ATTENDEES"
 type SortDirection = "asc" | "desc"
 
 interface EventsTableProps {
-  onEventView?: (event: EventDetails) => void
-  onEventEdit?: (event: EventDetails) => void
+  onEventView?: (event: FrontendEventData) => void
+  onEventEdit?: (event: FrontendEventData) => void
 }
 
 export default function EventsTable({ onEventView, onEventEdit }: EventsTableProps) {
@@ -108,25 +90,40 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
     return statuses.sort()
   }, [events])
 
+  // Helper function to extract date from startDateTime
+  const getEventDate = (event: FrontendEventData): string => {
+    return dayjs(event.startDateTime).format("YYYY-MM-DD")
+  }
+
+  // Helper function to extract time from startDateTime
+  const getEventStartTime = (event: FrontendEventData): string => {
+    return dayjs(event.startDateTime).format("HH:mm")
+  }
+
+  // Helper function to extract time from endDateTime
+  const getEventEndTime = (event: FrontendEventData): string => {
+    if (!event.endDateTime) return "N/A"
+    return dayjs(event.endDateTime).format("HH:mm")
+  }
+
   // Filter and sort events
   const filteredAndSortedEvents = useMemo(() => {
-    const getSortValue = (event: EventDetails): string | number => {
+    const getSortValue = (event: FrontendEventData): string | number => {
       switch (sortField) {
         case "TITLE":
           return event.title.toLowerCase()
         case "DATE":
-          const dateStr = `${event.date}T${event.startTime ?? "00:00"}`
-          const date = new Date(dateStr)
+          const date = new Date(event.startDateTime)
           return isNaN(date.getTime()) ? Number.NEGATIVE_INFINITY : date.getTime()
         case "TYPE":
           return event.type
         case "PRIORITY":
           const priorityOrder = { LOW: 1, MEDIUM: 2, HIGH: 3, URGENT: 4 }
-          return priorityOrder[event.priority] || 0
+          return priorityOrder[event.priority as keyof typeof priorityOrder] || 0
         case "STATUS":
           return event.status
         case "ORGANIZER":
-          return event.organizer?.toLowerCase() ?? ""
+          return typeof event.organizer === "string" ? event.organizer.toLowerCase() : ""
         case "ATTENDEES":
           return event.attendees.length
       }
@@ -175,9 +172,10 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
     return parsed.isValid() ? parsed.format("MMM D, YYYY") : "Invalid date"
   }
 
-  const formatTime = (time?: string): string => {
+  const formatTime = (time: string): string => {
     if (!time) return "N/A"
-    const parsed = dayjs(`1970-01-01T${time}`)
+    const timeWithDate = time.includes("T") ? time : `1970-01-01T${time}`
+    const parsed = dayjs(timeWithDate)
     return parsed.isValid() ? parsed.format("h:mm A") : "Invalid time"
   }
 
@@ -213,21 +211,33 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
     deleteEvent.mutate({ id: eventId })
   }
 
-  const handleDuplicate = (event: EventDetails) => {
+  const handleDuplicate = (event: FrontendEventData) => {
     const newEvent: z.infer<typeof CreateEventSchema> = {
       title: `${event.title} (Copy)`,
-      date: event.date,
-      startTime: event.startTime,
-      endTime: event.endTime,
-      type: event.type,
-      priority: event.priority,
-      status: event.status,
+      startDateTime: event.startDateTime,
+      endDateTime: event.endDateTime,
+      type: event.type as "MEETING" | "WORKSHOP" | "CONFERENCE" | "TRAINING" | "WEBINAR" | "SOCIAL" | "OTHER",
+      priority: event.priority as "LOW" | "MEDIUM" | "HIGH" | "URGENT",
+      status: event.status as "CONFIRMED" | "TENTATIVE" | "CANCELLED",
       description: event.description,
       location: event.location,
       creatorId: event.creatorId,
       tagIds: event.tagIds ?? [],
-      reminders: event.reminders.map(rem => ({ type: rem.type as "EMAIL" | "PUSH" | "SMS", value: rem.value })),
-      attendees: event.attendees.map(att => ({ userId: att.userId, status: att.status as "PENDING" | "ACCEPTED" | "DECLINED" | "MAYBE" })),
+      reminders: event.reminders.map(rem => ({
+        type: rem.type as "EMAIL" | "PUSH" | "SMS",
+        value: rem.value,
+      })),
+      attendees: event.attendees.map(att => ({
+        userId: att.userId,
+        status: att.status as "PENDING" | "ACCEPTED" | "DECLINED" | "MAYBE",
+      })),
+      timezone: event.timezone,
+      isOnline: event.isOnline,
+      isPublic: event.isPublic,
+      notes: event.notes,
+      maxAttendees: event.maxAttendees,
+      recurrenceEnd: event.recurrenceEnd,
+      recurring: "NONE"
     }
     createEvent.mutate(newEvent)
   }
@@ -291,7 +301,10 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
                 {eventTypes.map((type) => (
                   <SelectItem key={type} value={type}>
                     <div className="flex items-center gap-2">
-                      <EventIndicator eventType={type} size="sm" />
+                      <EventIndicator
+                        eventType={type as "MEETING" | "WORKSHOP" | "CONFERENCE" | "TRAINING" | "WEBINAR" | "SOCIAL" | "OTHER"}
+                        size="sm"
+                      />
                       <span className="capitalize">{type.toLowerCase()}</span>
                     </div>
                   </SelectItem>
@@ -441,7 +454,10 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
                   >
                     <TableCell className="font-medium">
                       <div className="flex items-start gap-3">
-                        <EventIndicator eventType={event.type} size="md" />
+                        <EventIndicator
+                          eventType={event.type as "MEETING" | "WORKSHOP" | "CONFERENCE" | "TRAINING" | "WEBINAR" | "SOCIAL" | "OTHER"}
+                          size="md"
+                        />
                         <div className="min-w-0 flex-1">
                           <div className="font-medium text-white truncate">{event.title}</div>
                           {event.description && (
@@ -455,17 +471,20 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
                       <div className="space-y-1">
                         <div className="flex items-center gap-1 text-sm text-gray-300">
                           <Calendar className="w-3 h-3" />
-                          {formatDate(event.date)}
+                          {formatDate(getEventDate(event))}
                         </div>
                         <div className="flex items-center gap-1 text-sm text-gray-400">
                           <Clock className="w-3 h-3" />
-                          {formatTime(event.startTime ?? "00:00")} - {formatTime(event.endTime)}
+                          {formatTime(getEventStartTime(event))} - {formatTime(getEventEndTime(event))}
                         </div>
                       </div>
                     </TableCell>
 
                     <TableCell>
-                      <EventIndicator eventType={event.type} showLabel />
+                      <EventIndicator
+                        eventType={event.type as "MEETING" | "WORKSHOP" | "CONFERENCE" | "TRAINING" | "WEBINAR" | "SOCIAL" | "OTHER"}
+                        showLabel
+                      />
                     </TableCell>
 
                     <TableCell>
@@ -492,7 +511,9 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
                     </TableCell>
 
                     <TableCell>
-                      <div className="text-sm text-gray-300 truncate max-w-32">{event.organizer ?? "-"}</div>
+                      <div className="text-sm text-gray-300 truncate max-w-32">
+                        {typeof event.organizer === "string" ? event.organizer : "-"}
+                      </div>
                     </TableCell>
 
                     <TableCell>

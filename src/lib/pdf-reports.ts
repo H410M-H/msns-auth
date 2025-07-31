@@ -9,7 +9,7 @@ export async function generatePdf(
   const firstPage = pdfDoc.addPage([595.28, 841.89]);
   const { width, height } = firstPage.getSize();
   const margin = 50;
-  
+
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
@@ -19,7 +19,7 @@ export async function generatePdf(
     y: height - 40,
     size: 18,
     font: boldFont,
-    color: rgb(0, 0, 0)
+    color: rgb(0, 0, 0),
   });
 
   firstPage.drawText(title, {
@@ -27,7 +27,7 @@ export async function generatePdf(
     y: height - 70,
     size: 14,
     font: boldFont,
-    color: rgb(0, 0, 0)
+    color: rgb(0, 0, 0),
   });
 
   // Table Configuration
@@ -43,9 +43,9 @@ export async function generatePdf(
       y: startY,
       size: 10,
       font: boldFont,
-      maxWidth: colWidths[index]
+      maxWidth: colWidths[index] ?? 100,
     });
-    xPos += colWidths[index];
+    xPos += colWidths[index] ?? 100;
   });
 
   // Draw Table Rows
@@ -59,15 +59,16 @@ export async function generatePdf(
 
     xPos = margin;
     headers.forEach((header, colIndex) => {
-      const value = String(row[header.key] ?? ''); // Convert to string and handle undefined
+      const rawValue = row[header.key];
+      const value = formatValue(rawValue);
       currentPage.drawText(value, {
         x: xPos,
         y: currentY,
         size: 10,
         font,
-        maxWidth: colWidths[colIndex]
+        maxWidth: colWidths[colIndex] ?? 100,
       });
-      xPos += colWidths[colIndex];
+      xPos += colWidths[colIndex] ?? 100;
     });
 
     currentY -= rowHeight;
@@ -84,4 +85,27 @@ function calculateColumnWidths(
   if (colCount === 0) return [];
   const baseWidth = totalWidth / colCount;
   return headers.map(() => baseWidth);
+}
+
+// Helper function to safely format values for PDF rendering
+function formatValue(value: unknown): string {
+  if (value === null || value === undefined) {
+    return "";
+  }
+  if (typeof value === "string") {
+    return value;
+  }
+  if (typeof value === "number" || typeof value === "boolean") {
+    return value.toString();
+  }
+  if (value instanceof Date) {
+    return value.toISOString().split("T")[0] ?? "";
+  }
+  if (Array.isArray(value)) {
+    return value.map(formatValue).join(", ");
+  }
+  if (typeof value === "object") {
+    return JSON.stringify(value);
+  }
+  return ""; // Fallback for any other type
 }

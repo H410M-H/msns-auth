@@ -1,6 +1,7 @@
 "use client"
 
-import { EVENT_TYPES } from "./event-colors"
+import { useMemo } from "react"
+import { EVENT_TYPES, type EventType } from "./event-colors"
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import { Palette } from "lucide-react"
 
@@ -10,21 +11,32 @@ interface EventColorLegendProps {
 }
 
 export default function EventColorLegend({ showTitle = true, compact = false }: EventColorLegendProps) {
-  if (compact) {
-    return (
-      <div className="flex flex-wrap gap-2">
-        {EVENT_TYPES.map((eventType) => (
-          <div
-            key={eventType.id}
-            className={`flex items-center gap-2 px-2 py-1 rounded-md ${eventType.bgColor} ${eventType.borderColor} border`}
-          >
-            <div className={`w-2 h-2 rounded-full bg-current ${eventType.color}`} />
-            <span className={`text-xs font-medium ${eventType.color}`}>{eventType.label}</span>
-          </div>
-        ))}
+  const renderedItems = useMemo((): JSX.Element[] => {
+    return EVENT_TYPES.map((eventType: EventType) => (
+      <div
+        key={eventType.id}
+        className={`flex items-center gap-3 p-3 rounded-lg ${eventType.bgColor} ${eventType.borderColor} border transition-all hover:scale-[1.02]`}
+      >
+        <div className={`w-4 h-4 rounded-full bg-current ${eventType.color} flex-shrink-0`} />
+        <div className="flex-1">
+          <div className={`font-medium ${eventType.color}`}>{eventType.label}</div>
+          <div className="text-xs text-gray-400 mt-1">{eventType.description}</div>
+        </div>
       </div>
-    )
-  }
+    ))
+  }, [])
+
+  const compactItems = useMemo((): JSX.Element[] => {
+    return EVENT_TYPES.map((eventType: EventType) => (
+      <div
+        key={eventType.id}
+        className={`flex items-center gap-2 px-2 py-1 rounded-md ${eventType.bgColor} ${eventType.borderColor} border transition-all hover:scale-[1.02]`}
+      >
+        <div className={`w-2 h-2 rounded-full bg-current ${eventType.color}`} />
+        <span className={`text-xs font-medium ${eventType.color}`}>{eventType.label}</span>
+      </div>
+    ))
+  }, [])
 
   return (
     <Card className="bg-gray-800 border-gray-700">
@@ -37,18 +49,7 @@ export default function EventColorLegend({ showTitle = true, compact = false }: 
         </CardHeader>
       )}
       <CardContent className="space-y-3">
-        {EVENT_TYPES.map((eventType) => (
-          <div
-            key={eventType.id}
-            className={`flex items-center gap-3 p-3 rounded-lg ${eventType.bgColor} ${eventType.borderColor} border transition-all hover:scale-[1.02]`}
-          >
-            <div className={`w-4 h-4 rounded-full bg-current ${eventType.color} flex-shrink-0`} />
-            <div className="flex-1">
-              <div className={`font-medium ${eventType.color}`}>{eventType.label}</div>
-              <div className="text-xs text-gray-400 mt-1">{eventType.description}</div>
-            </div>
-          </div>
-        ))}
+        {compact ? <div className="flex flex-wrap gap-2">{compactItems}</div> : renderedItems}
       </CardContent>
     </Card>
   )

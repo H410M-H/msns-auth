@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { generatePdf } from "~/lib/utils/pdf-reports";
+import { generatePdf } from "~/lib/pdf-reports";
 
 const reportTypeSchema = z.enum([
   'students',
@@ -19,8 +19,6 @@ export const ReportRouter = createTRPCRouter({
       try {
         const { reportType } = input;
         const title = `${reportType} Report`;
-
-        const headers: string[] = [];
 
         switch (reportType) {
           case 'students': {
@@ -43,17 +41,17 @@ export const ReportRouter = createTRPCRouter({
               status: student.isAssign ? 'Assigned' : 'Unassigned'
             }));
 
-            headers.push(
-              'ID',
-              'Student Name',
-              'Reg Number',
-              'Adm Number',
-              'Birth Date',
-              'Gender',
-              'Father Name',
-              'Contact',
-              'Status'
-            );
+            const headers = [
+              { key: 'studentId', label: 'ID' },
+              { key: 'studentName', label: 'Student Name' },
+              { key: 'registrationNumber', label: 'Reg Number' },
+              { key: 'admissionNumber', label: 'Adm Number' },
+              { key: 'dateOfBirth', label: 'Birth Date' },
+              { key: 'gender', label: 'Gender' },
+              { key: 'fatherName', label: 'Father Name' },
+              { key: 'studentMobile', label: 'Contact' },
+              { key: 'status', label: 'Status' }
+            ];
 
             const pdf = await generatePdf(studentData, headers, title);
             return { pdf };
@@ -68,14 +66,14 @@ export const ReportRouter = createTRPCRouter({
               }
             });
 
-            headers.push(
-              'Employee ID',
-              'Name',
-              'Designation',
-              'Salary',
-              'Contact',
-              'Join Date'
-            );
+            const headers = [
+              { key: 'employeeId', label: 'Employee ID' },
+              { key: 'employeeName', label: 'Name' },
+              { key: 'designation', label: 'Designation' },
+              { key: 'salary', label: 'Salary' },
+              { key: 'employeeMobile', label: 'Contact' },
+              { key: 'joinDate', label: 'Join Date' }
+            ];
 
             const pdf = await generatePdf(dbData, headers, title);
             return { pdf };

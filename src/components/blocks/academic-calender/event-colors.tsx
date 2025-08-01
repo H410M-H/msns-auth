@@ -9,7 +9,7 @@ export interface EventType {
 
 export const EVENT_TYPES: EventType[] = [
   {
-    id: "meeting",
+    id: "MEETING",
     label: "Meeting",
     color: "text-blue-400",
     bgColor: "bg-blue-500/20",
@@ -17,7 +17,7 @@ export const EVENT_TYPES: EventType[] = [
     description: "Team meetings, one-on-ones, client calls",
   },
   {
-    id: "workshop",
+    id: "WORKSHOP",
     label: "Workshop",
     color: "text-purple-400",
     bgColor: "bg-purple-500/20",
@@ -25,7 +25,7 @@ export const EVENT_TYPES: EventType[] = [
     description: "Hands-on learning sessions and skill building",
   },
   {
-    id: "conference",
+    id: "CONFERENCE",
     label: "Conference",
     color: "text-green-400",
     bgColor: "bg-green-500/20",
@@ -33,7 +33,7 @@ export const EVENT_TYPES: EventType[] = [
     description: "Large events, presentations, keynotes",
   },
   {
-    id: "training",
+    id: "TRAINING",
     label: "Training",
     color: "text-orange-400",
     bgColor: "bg-orange-500/20",
@@ -41,7 +41,7 @@ export const EVENT_TYPES: EventType[] = [
     description: "Educational sessions and certification courses",
   },
   {
-    id: "webinar",
+    id: "WEBINAR",
     label: "Webinar",
     color: "text-cyan-400",
     bgColor: "bg-cyan-500/20",
@@ -49,7 +49,7 @@ export const EVENT_TYPES: EventType[] = [
     description: "Online presentations and virtual events",
   },
   {
-    id: "social",
+    id: "SOCIAL",
     label: "Social Event",
     color: "text-pink-400",
     bgColor: "bg-pink-500/20",
@@ -57,7 +57,7 @@ export const EVENT_TYPES: EventType[] = [
     description: "Team building, parties, networking events",
   },
   {
-    id: "other",
+    id: "OTHER",
     label: "Other",
     color: "text-gray-400",
     bgColor: "bg-gray-500/20",
@@ -71,12 +71,11 @@ export const getEventTypeById = (id: string): EventType | undefined => {
 }
 
 export const getEventTypeColor = (typeId: string): EventType => {
-  const found = getEventTypeById(typeId)
-  if (found) return found
-  return EVENT_TYPES.find((type) => type.id === "other")! // Fallback is guaranteed to exist
+  const found = getEventTypeById(typeId.toUpperCase())
+  return found ?? EVENT_TYPES.find((type) => type.id === "OTHER")!
 }
 
 export const getEventTypeLabel = (typeId: string): string => {
-  const eventType = getEventTypeById(typeId)
+  const eventType = getEventTypeById(typeId.toUpperCase())
   return eventType ? eventType.label : "Unknown"
 }

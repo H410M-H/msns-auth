@@ -1,4 +1,6 @@
 "use client"
+
+import { useCallback, useMemo } from "react"
 import { Calendar, Clock, MapPin, X } from "lucide-react"
 import { Button } from "~/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog"
@@ -16,29 +18,29 @@ interface DateEventsModalProps {
 }
 
 export default function DateEventsModal({ isOpen, onClose, date, events, onEventClick }: DateEventsModalProps) {
-  const formatDate = (date: Date) => {
+  const formatDate = useCallback((date: Date): string => {
     return date.toLocaleDateString("en-US", {
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
     })
-  }
+  }, [])
 
-  const formatTime = (time: string) => {
-    const [hours, minutes] = time.split(":")
+  const formatTime = useCallback((time: string): string => {
+    const [hours = "0", minutes = "0"] = time.split(":")
     const date = new Date()
-date.setHours(Number.parseInt(hours ?? "0"), Number.parseInt(minutes ?? "0"));
+    date.setHours(Number.parseInt(hours), Number.parseInt(minutes))
     return date.toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
     })
-  }
+  }, [])
 
-  const sortedEvents = [...events].sort((a, b) => {
-    return a.startTime.localeCompare(b.startTime)
-  })
+  const sortedEvents = useMemo((): EventDetails[] => {
+    return [...events].sort((a, b) => a.startTime.localeCompare(b.startTime))
+  }, [events])
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -54,7 +56,6 @@ date.setHours(Number.parseInt(hours ?? "0"), Number.parseInt(minutes ?? "0"));
             </Button>
           </DialogTitle>
         </DialogHeader>
-
         <div className="space-y-4">
           {sortedEvents.length === 0 ? (
             <div className="text-center py-8">
@@ -66,7 +67,6 @@ date.setHours(Number.parseInt(hours ?? "0"), Number.parseInt(minutes ?? "0"));
               <div className="text-sm text-gray-400 mb-4">
                 {sortedEvents.length} event{sortedEvents.length !== 1 ? "s" : ""} scheduled
               </div>
-
               {sortedEvents.map((event) => {
                 const eventColor = getEventTypeColor(event.type)
                 return (

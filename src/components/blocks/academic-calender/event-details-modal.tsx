@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback, useMemo } from "react"
 import { Calendar, Clock, MapPin, Users, Bell, User, FileText, X } from 'lucide-react'
 import { Button } from "~/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog"
@@ -43,18 +43,7 @@ export default function EventDetailsModal({
 }: EventDetailsModalProps) {
   const [] = useState(false)
 
-  if (!event) return null
-
-  const eventColor: EventType = getEventTypeColor(event.type) ?? {
-    id: "other",
-    label: "Other",
-    color: "text-gray-400",
-    bgColor: "bg-gray-500/20",
-    borderColor: "border-gray-500",
-    description: "Miscellaneous events and activities",
-  }
-
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string): string => {
     const date = new Date(dateString)
     return date.toLocaleDateString("en-US", {
       weekday: "long",
@@ -62,9 +51,9 @@ export default function EventDetailsModal({
       month: "long",
       day: "numeric",
     })
-  }
+  }, [])
 
-  const formatTime = (time: string) => {
+  const formatTime = useCallback((time: string): string => {
     const [hours = "0", minutes = "0"] = time.split(":")
     const date = new Date()
     date.setHours(Number.parseInt(hours), Number.parseInt(minutes))
@@ -73,9 +62,10 @@ export default function EventDetailsModal({
       minute: "2-digit",
       hour12: true,
     })
-  }
+  }, [])
 
-  const getDuration = () => {
+  const getDuration = useCallback((): string => {
+    if (!event) return ""
     const start = new Date(`2000-01-01T${event.startTime}`)
     const end = new Date(`2000-01-01T${event.endTime}`)
     const diffMs = end.getTime() - start.getTime()
@@ -89,9 +79,9 @@ export default function EventDetailsModal({
     } else {
       return `${diffHours}h ${diffMinutes}m`
     }
-  }
+  }, [event])
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityColor = useCallback((priority: string): string => {
     switch (priority) {
       case "urgent":
         return "bg-red-500/20 text-red-400 border-red-500"
@@ -104,9 +94,9 @@ export default function EventDetailsModal({
       default:
         return "bg-gray-500/20 text-gray-400 border-gray-500"
     }
-  }
+  }, [])
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = useCallback((status: string): string => {
     switch (status) {
       case "confirmed":
         return "bg-green-500/20 text-green-400 border-green-500"
@@ -117,8 +107,30 @@ export default function EventDetailsModal({
       default:
         return "bg-gray-500/20 text-gray-400 border-gray-500"
     }
-  }
+  }, [])
 
+  const eventColor = useMemo((): EventType => {
+    if (!event) {
+      return {
+        id: "other",
+        label: "Other",
+        color: "text-gray-400",
+        bgColor: "bg-gray-500/20",
+        borderColor: "border-gray-500",
+        description: "Miscellaneous events and activities",
+      }
+    }
+    return getEventTypeColor(event.type) ?? {
+      id: "other",
+      label: "Other",
+      color: "text-gray-400",
+      bgColor: "bg-gray-500/20",
+      borderColor: "border-gray-500",
+      description: "Miscellaneous events and activities",
+    }
+  }, [event])
+
+  if (!event) return null
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -132,9 +144,7 @@ export default function EventDetailsModal({
             </Button>
           </DialogTitle>
         </DialogHeader>
-
         <div className="space-y-6">
-          {/* Event Header Card */}
           <div className={`p-4 rounded-lg ${eventColor.bgColor} ${eventColor.borderColor} border`}>
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -149,38 +159,29 @@ export default function EventDetailsModal({
                 </Badge>
               </div>
             </div>
-            </div>
-
             {event.description && <p className="text-gray-300 text-sm leading-relaxed">{event.description}</p>}
           </div>
-
-          {/* Event Details Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Date & Time */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-blue-400" />
                 Date & Time
               </h3>
-
               <div className="space-y-3 text-sm">
                 <div className="flex items-center gap-3">
                   <Calendar className="w-4 h-4 text-gray-400" />
                   <span className="text-gray-300">{formatDate(event.date)}</span>
                 </div>
-
                 <div className="flex items-center gap-3">
                   <Clock className="w-4 h-4 text-gray-400" />
                   <span className="text-gray-300">
                     {formatTime(event.startTime)} - {formatTime(event.endTime)}
                   </span>
                 </div>
-
                 <div className="flex items-center gap-3">
                   <div className="w-4 h-4" />
                   <span className="text-gray-400">Duration: {getDuration()}</span>
                 </div>
-
                 {event.recurring !== "none" && (
                   <div className="flex items-center gap-3">
                     <div className="w-4 h-4" />
@@ -191,14 +192,11 @@ export default function EventDetailsModal({
                 )}
               </div>
             </div>
-
-            {/* Location & Attendees */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-blue-400" />
                 Details
               </h3>
-
               <div className="space-y-3 text-sm">
                 {event.location && (
                   <div className="flex items-center gap-3">
@@ -206,14 +204,12 @@ export default function EventDetailsModal({
                     <span className="text-gray-300">{event.location}</span>
                   </div>
                 )}
-
                 {event.attendees && (
                   <div className="flex items-center gap-3">
                     <Users className="w-4 h-4 text-gray-400" />
                     <span className="text-gray-300">{event.attendees} attendees expected</span>
                   </div>
                 )}
-
                 {event.organizer && (
                   <div className="flex items-center gap-3">
                     <User className="w-4 h-4 text-gray-400" />
@@ -223,8 +219,6 @@ export default function EventDetailsModal({
               </div>
             </div>
           </div>
-
-          {/* Additional Information */}
           {(event.reminders?.length ?? event.notes) && (
             <>
               <Separator className="bg-gray-700" />
@@ -233,7 +227,6 @@ export default function EventDetailsModal({
                   <FileText className="w-5 h-5 text-blue-400" />
                   Additional Information
                 </h3>
-
                 {event.reminders?.length && (
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm">
@@ -249,7 +242,6 @@ export default function EventDetailsModal({
                     </div>
                   </div>
                 )}
-
                 {event.notes && (
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm">
@@ -262,7 +254,8 @@ export default function EventDetailsModal({
               </div>
             </>
           )}
-</DialogContent>
-      </Dialog>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }

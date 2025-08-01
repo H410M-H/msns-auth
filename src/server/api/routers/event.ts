@@ -1,13 +1,13 @@
 import { z } from 'zod';
-import { createTRPCRouter, protectedProcedure } from '../trpc';
+import { createTRPCRouter, publicProcedure } from '../trpc';
 import { type Prisma } from '@prisma/client';
 import { AttendeeStatusSchema, CreateEventSchema, EventStatusSchema, UpdateEventSchema } from '~/lib/event-schemas';
-import { safeTransformEventForDatabase, safeTransformEventForFrontend } from '~/lib/event-helpers';
+import { safeTransformEventForDatabase, safeTransformEventForFrontend, type FrontendEventData } from '~/lib/event-helpers';
 
 export const EventRouter = createTRPCRouter({
-  create: protectedProcedure
+  create: publicProcedure
     .input(CreateEventSchema)
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }): Promise<FrontendEventData> => {
       const eventData = safeTransformEventForDatabase(input);
       const event = await ctx.db.event.create({
         data: {
@@ -15,7 +15,7 @@ export const EventRouter = createTRPCRouter({
           User: { connect: { id: input.creatorId } },
           tags: input.tagIds
             ? {
-                create: input.tagIds.map((tagId) => ({
+                create: input.tagIds.map((tagId: string) => ({
                   tag: { connect: { id: tagId } },
                 })),
               }
@@ -47,9 +47,9 @@ export const EventRouter = createTRPCRouter({
       return safeTransformEventForFrontend(event);
     }),
 
-  update: protectedProcedure
+  update: publicProcedure
     .input(UpdateEventSchema)
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }): Promise<FrontendEventData> => {
       const eventData = safeTransformEventForDatabase(input);
       const event = await ctx.db.event.update({
         where: { id: input.id },
@@ -59,7 +59,7 @@ export const EventRouter = createTRPCRouter({
           tags: input.tagIds
             ? {
                 deleteMany: {},
-                create: input.tagIds.map((tagId) => ({
+                create: input.tagIds.map((tagId: string) => ({
                   tag: { connect: { id: tagId } },
                 })),
               }
@@ -93,9 +93,9 @@ export const EventRouter = createTRPCRouter({
       return safeTransformEventForFrontend(event);
     }),
 
-  getById: protectedProcedure
-    .input(z.object({ id: z.string().min(1) }))
-    .query(async ({ ctx, input }) => {
+  getById: publicProcedure
+    .input(z.object({ id: z.string().min(1, 'Event ID is required') }))
+    .query(async ({ ctx, input }): Promise<FrontendEventData> => {
       const event = await ctx.db.event.findUnique({
         where: { id: input.id },
         include: {
@@ -111,7 +111,7 @@ export const EventRouter = createTRPCRouter({
       return safeTransformEventForFrontend(event);
     }),
 
-  getAll: protectedProcedure
+  getAll: publicProcedure
     .input(
       z.object({
         search: z.string().optional(),
@@ -120,7 +120,7 @@ export const EventRouter = createTRPCRouter({
         limit: z.number().int().positive().default(10),
       })
     )
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx, input }): Promise<{ events: FrontendEventData[]; total: number }> => {
       const where: Prisma.EventWhereInput = {
         AND: [
           input.search
@@ -157,24 +157,24 @@ export const EventRouter = createTRPCRouter({
       };
     }),
 
-  delete: protectedProcedure
-    .input(z.object({ id: z.string().min(1) }))
-    .mutation(async ({ ctx, input }) => {
+  delete: publicProcedure
+    .input(z.object({ id: z.string().min(1, 'Event ID is required') }))
+    .mutation(async ({ ctx, input }): Promise<{ success: boolean }> => {
       await ctx.db.event.delete({
         where: { id: input.id },
       });
       return { success: true };
     }),
 
-  updateAttendeeStatus: protectedProcedure
+  updateAttendeeStatus: publicProcedure
     .input(
       z.object({
-        eventId: z.string().min(1),
-        userId: z.string().min(1),
+        eventId: z.string().min(1, 'Event ID is required'),
+        userId: z.string().min(1, 'User ID is required'),
         status: AttendeeStatusSchema,
       })
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }): Promise<{ userId: string; status: string }> => {
       const attendee = await ctx.db.attendee.upsert({
         where: {
           eventId_userId: { eventId: input.eventId, userId: input.userId },
@@ -190,16 +190,17 @@ export const EventRouter = createTRPCRouter({
       return { userId: attendee.userId, status: attendee.status };
     }),
 
-  createTag: protectedProcedure
-    .input(z.object({ name: z.string().min(1), color: z.string().min(1) }))
-    .mutation(async ({ ctx, input }) => {
+  createTag: publicProcedure
+    .input(z.object({ name: z.string().min(1, 'Tag name is required'), color: z.string().min(1, 'Tag color is required') }))
+    .mutation(async ({ ctx, input }): Promise<{ id: string; name: string; color: string }> => {
       const tag = await ctx.db.tag.create({
         data: { name: input.name, color: input.color },
       });
       return { id: tag.id, name: tag.name, color: tag.color };
     }),
 
-  getTags: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.db.tag.findMany();
-  }),
+  getTags: publicProcedure
+    .query(async ({ ctx }): Promise<{ id: string; name: string; color: string }[]> => {
+      return ctx.db.tag.findMany();
+    }),
 });

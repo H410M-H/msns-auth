@@ -1,10 +1,9 @@
 "use client"
 
-import type React from "react"
-
+import { useCallback, useMemo } from "react"
 import EventIndicator from "./event-indicator"
-import type { EventDetails } from "./event-details-modal"
 import { getEventCountForDate, getEventTypesForDate } from "./event-utils"
+import { type EventDetails } from "./event-details-modal"
 
 interface CalendarDateCellProps {
   day: number
@@ -23,17 +22,15 @@ export default function CalendarDateCell({
   onClick,
   onDateClick,
 }: CalendarDateCellProps) {
-  const eventTypes = getEventTypesForDate(events, date)
-  const eventCount = getEventCountForDate(events, date)
+  const eventTypes = useMemo((): string[] => getEventTypesForDate(events, date), [events, date])
+  const eventCount = useMemo((): number => getEventCountForDate(events, date), [events, date])
   const hasEvents = eventCount > 0
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>): void => {
     e.preventDefault()
-    onClick() // Select the date
-    if (hasEvents) {
-      onDateClick(date) // Show events for this date
-    }
-  }
+    onClick()
+    if (hasEvents) onDateClick(date)
+  }, [onClick, onDateClick, hasEvents, date])
 
   return (
     <div className="relative">
@@ -50,8 +47,6 @@ export default function CalendarDateCell({
       >
         {day}
       </button>
-
-      {/* Event Indicators */}
       {hasEvents && (
         <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 flex gap-1">
           {eventTypes.slice(0, 3).map((eventType, index) => (
@@ -64,8 +59,6 @@ export default function CalendarDateCell({
           )}
         </div>
       )}
-
-      {/* Event Count Badge */}
       {eventCount > 1 && (
         <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg">
           {eventCount > 9 ? "9+" : eventCount}

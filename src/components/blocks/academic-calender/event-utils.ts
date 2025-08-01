@@ -1,4 +1,4 @@
-import type { EventDetails } from "./event-details-modal"
+import { type EventDetails } from "./event-details-modal"
 
 export const getEventsForDate = (events: EventDetails[], date: Date): EventDetails[] => {
   const dateString = date.toISOString().split("T")[0]

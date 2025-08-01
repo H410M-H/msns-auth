@@ -9,7 +9,7 @@ export type EventWithRelations = Event & {
 };
 
 export interface FrontendEventData {
-  organizer: unknown;
+  organizer: User | null;
   id: string;
   title: string;
   description?: string;
@@ -95,7 +95,7 @@ export function safeTransformEventForFrontend(event: EventWithRelations): Fronte
   const recurrenceEnd = event.recurrenceEnd ? event.recurrenceEnd.toISOString() : undefined;
 
   return {
-  organizer: event.User[0] ?? null,
+    organizer: event.User[0] ?? null,
     id: event.id,
     title: event.title,
     description: event.description ?? undefined,

@@ -1,15 +1,10 @@
 import { z } from 'zod';
 
 export const EventStatusSchema = z.enum(['CONFIRMED', 'TENTATIVE', 'CANCELLED']);
-
 export const ReminderTypeSchema = z.enum(['EMAIL', 'PUSH', 'SMS']);
-
 export const AttendeeStatusSchema = z.enum(['PENDING', 'ACCEPTED', 'DECLINED', 'MAYBE']);
-
 export const RecurrenceTypeSchema = z.enum(['NONE', 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY']);
-
 export const EventTypeSchema = z.enum(['MEETING', 'WORKSHOP', 'CONFERENCE', 'TRAINING', 'WEBINAR', 'SOCIAL', 'OTHER']);
-
 export const PrioritySchema = z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']);
 
 export const CreateEventSchema = z.object({

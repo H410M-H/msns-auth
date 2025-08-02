@@ -63,7 +63,7 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
     limit,
   })
 
-  const events = useMemo(() => data?.events ?? [], [data])
+  const events = useMemo(() => (data?.events ?? []), [data])
   const totalEvents = data?.total ?? 0
 
   // tRPC mutations
@@ -111,21 +111,23 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
     const getSortValue = (event: FrontendEventData): string | number => {
       switch (sortField) {
         case "TITLE":
-          return event.title.toLowerCase()
+          return event.title?.toLowerCase() ?? ""
         case "DATE":
           const date = new Date(event.startDateTime)
           return isNaN(date.getTime()) ? Number.NEGATIVE_INFINITY : date.getTime()
         case "TYPE":
-          return event.type
+          return event.type ?? ""
         case "PRIORITY":
           const priorityOrder = { LOW: 1, MEDIUM: 2, HIGH: 3, URGENT: 4 }
           return priorityOrder[event.priority as keyof typeof priorityOrder] || 0
         case "STATUS":
-          return event.status
+          return event.status ?? ""
         case "ORGANIZER":
-          return typeof event.organizer === "string" ? event.organizer.toLowerCase() : ""
+          return (event.organizer as unknown as string)?.toLowerCase() ?? ""
         case "ATTENDEES":
-          return event.attendees.length
+          return event.attendees?.length ?? 0
+        default:
+          return ""
       }
     }
 
@@ -133,7 +135,7 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
       const matchesType = typeFilter === "all" || event.type === typeFilter
       const matchesPriority = priorityFilter === "all" || event.priority === priorityFilter
       const matchesStatus = statusFilter === "all" || event.status === statusFilter
-      return matchesType && matchesPriority && matchesStatus && event.title !== ""
+      return matchesType && matchesPriority && matchesStatus && event.title
     })
 
     filtered.sort((a, b) => {
@@ -223,21 +225,21 @@ export default function EventsTable({ onEventView, onEventEdit }: EventsTablePro
       location: event.location,
       creatorId: event.creatorId,
       tagIds: event.tagIds ?? [],
-      reminders: event.reminders.map(rem => ({
+      reminders: event.reminders?.map((rem) => ({
         type: rem.type as "EMAIL" | "PUSH" | "SMS",
         value: rem.value,
-      })),
-      attendees: event.attendees.map(att => ({
+      })) ?? [],
+      attendees: event.attendees?.map((att) => ({
         userId: att.userId,
         status: att.status as "PENDING" | "ACCEPTED" | "DECLINED" | "MAYBE",
-      })),
+      })) ?? [],
       timezone: event.timezone,
       isOnline: event.isOnline,
       isPublic: event.isPublic,
       notes: event.notes,
       maxAttendees: event.maxAttendees,
       recurrenceEnd: event.recurrenceEnd,
-      recurring: "NONE"
+      recurring: "NONE",
     }
     createEvent.mutate(newEvent)
   }

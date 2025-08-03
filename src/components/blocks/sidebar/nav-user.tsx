@@ -65,7 +65,7 @@ export const NavUser = () => {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/settings">
+                <Link href="/admin/users/account/settings">
                   <Settings className="mr-2 size-4" />
                   <span>Settings</span>
                 </Link>

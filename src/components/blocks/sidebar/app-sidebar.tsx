@@ -60,7 +60,7 @@ const data: NavigationConfig = {
     },
     {
       title: "Setting",
-      url: "/artisan/setting",
+      url: "/admin/user/account/settings",
       icon: Settings,
     },
   ],

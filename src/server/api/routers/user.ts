@@ -27,6 +27,19 @@ export const UserRouter = createTRPCRouter({
     }
   }),
 
+  getUserById: publicProcedure.query(async ({ ctx }) => {
+    try {
+      const users = await ctx.db.user.findUnique({where: {id: ctx.session?.user.id ?? ""}})
+            return users      
+    } catch (error) {
+      console.error(error)
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Something went wrong.",
+      })
+    }
+  }),
+
   getUnAllocatedUsers: publicProcedure.query(async ({ ctx }) => {
     try {
       const users = await ctx.db.user.findMany({
